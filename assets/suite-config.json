@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "tripmap": {
+    "weather": {
+      "enabledOnProd": true,
+      "enabledOnLocalhost": false,
+      "allowLocalOverride": true
+    }
+  },
+  "tripify": {
+    "revision": {
+      "enabled": true,
+      "idleFocusMs": 600000,
+      "autoRefreshOnLoad": true
+    }
+  }
+}

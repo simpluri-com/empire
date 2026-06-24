@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire — Territory Board Game</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon-empire.svg">
+    <meta name="description" content="Play Empire online—the classic territory board game with dice-driven battles and strategic map control.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; }
+        .glass-header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-800 antialiased min-h-screen flex flex-col" data-suite-current-app="empire">
+
+    <header class="glass-header sticky top-0 z-40 border-b border-amber-200/80 px-3 md:px-4 py-2.5 flex justify-between items-center">
+        <div class="flex items-center gap-2 min-w-0">
+            <a data-suite-href="portal" href="https://simpluri.com/" title="Back to Simpluri Apps" aria-label="Back to Simpluri Apps" class="shrink-0 p-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-amber-200">
+                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+            <div class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl shadow-sm ring-1 ring-amber-100 overflow-hidden bg-white">
+                <img src="/assets/favicon-empire.svg" alt="" class="w-full h-full" width="36" height="36" decoding="async"/>
+            </div>
+            <div class="min-w-0">
+                <div class="text-lg font-extrabold text-amber-700 tracking-tight leading-tight">Empire</div>
+                <div class="text-[11px] text-slate-500 font-medium hidden sm:block">Territory board game</div>
+            </div>
+        </div>
+        <div class="relative shrink-0">
+            <button type="button" data-suite-menu-btn="" aria-controls="empire-app-suite-menu" aria-expanded="false" class="p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors focus:outline-none" aria-label="Menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+            </button>
+            <div id="empire-app-suite-menu" data-suite-menu-dropdown="" class="hidden absolute end-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-[60] text-start overflow-hidden">
+                <a data-suite-nav="portal" data-suite-href="portal" href="https://simpluri.com/" class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 border-b border-slate-100 text-start">
+                    <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-simpluri.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
+                    <span class="font-bold text-blue-600 text-xs">Simpluri Apps</span>
+                </a>
+                <a data-suite-nav="tripify" data-suite-href="tripifyApp" href="#" class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 border-b border-slate-100 text-start">
+                    <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-tripify.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
+                    <span class="font-bold text-teal-600 text-xs">Tripify</span>
+                </a>
+                <a data-suite-nav="tripmap" data-suite-href="tripmapApp" href="#" class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 border-b border-slate-100 text-start">
+                    <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-tripmap.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
+                    <span class="font-bold text-purple-600 text-xs">Tripmap</span>
+                </a>
+                <a data-suite-nav="gifoff" data-suite-href="gifoffApp" href="#" class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 border-b border-slate-100 text-start">
+                    <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-gif-off.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
+                    <span class="font-bold text-emerald-600 text-xs">GIF-Off</span>
+                </a>
+                <a data-suite-nav="empire" data-suite-href="empireApp" href="#" class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 border-b border-slate-100 text-start">
+                    <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-empire.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
+                    <span class="font-bold text-amber-600 text-xs">Empire</span>
+                </a>
+                <a data-suite-href="empire" href="https://simpluri.com/apps/empire/empire.html" class="block px-4 py-2.5 text-sm text-amber-700 hover:bg-amber-50 font-medium">About Empire</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-4 py-16">
+        <div class="max-w-lg w-full text-center">
+            <div class="inline-flex w-20 h-20 items-center justify-center rounded-3xl bg-white shadow-lg ring-1 ring-amber-100 mb-6">
+                <img src="/assets/favicon-empire.svg" alt="" class="w-14 h-14" width="56" height="56" decoding="async"/>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3">Empire is loading its map</h1>
+            <p class="text-slate-600 mb-8 leading-relaxed">Game logic ships here next—territory links, dice combat, and multiplayer rooms. For now, explore the rules and vision on the marketing page.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a data-suite-href="empire" href="https://simpluri.com/apps/empire/empire.html" class="inline-flex justify-center bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-full font-semibold shadow-md transition">Learn more</a>
+                <a data-suite-href="portal" href="https://simpluri.com/" class="inline-flex justify-center bg-white hover:bg-amber-50 text-slate-700 border border-amber-200 px-6 py-3 rounded-full font-semibold transition">Simpluri Apps</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="/assets/simpluri-menu.js"></script>
+</body>
+</html>
