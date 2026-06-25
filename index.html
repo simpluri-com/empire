@@ -1,31 +1,131 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire — Territory Board Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script>
+        (function () {
+            var lang = localStorage.getItem('empire_lang') || 'he';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('empire_theme') || 'dark');
+        })();
+    </script>
+    <!-- הגדרות אפליקציה מתקדמות לנייד (PWA) - מובנה ישירות בקובץ -->
+    <meta name="theme-color" content="#6200ee">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="application-name" content="כיבוש מוחות">
+    <meta name="apple-mobile-web-app-title" content="כיבוש מוחות">
+
+    <!-- Manifest מובנה כ-Data URI המאפשר התקנה כאפליקציה אמיתית ללא קובץ נוסף -->
+    <link rel="manifest" href='data:application/json,{"name":"משחק הפתקים: כיבוש מוחות","short_name":"כיבוש מוחות","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#6200ee","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🧠</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
+
+    <title>Empire — כיבוש מוחות</title>
     <link rel="icon" type="image/svg+xml" href="/assets/favicon-empire.svg">
-    <meta name="description" content="Play Empire online—the classic territory board game with dice-driven battles and strategic map control.">
+    <meta name="description" content="Empire — משחק הפתקים לכיבוש מוחות. הזינו דמויות בסוד, גלו את הרoster, ונחשו מי כתב מה עד שמישהו שולט בכולם.">
+
+    <!-- טעינת Tailwind CSS לעיצוב פרימיום מודרני -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Heebo', sans-serif; }
-        .glass-header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); }
+        body {
+            font-family: 'Assistant', sans-serif;
+            touch-action: manipulation;
+        }
+        .empire-topchrome { font-family: 'Heebo', 'Assistant', sans-serif; }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .main-layout {
+            height: 100%;
+            max-height: calc(100dvh - 3.25rem);
+            max-height: calc(-webkit-fill-available - 3.25rem);
+        }
+        [data-theme="light"] body.empire-app {
+            background-color: #fffbeb;
+            color: #1e293b;
+        }
+        [data-theme="light"] .empire-game-shell {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+        }
+        [data-theme="light"] .empire-heading { color: #6d28d9; }
+        [data-theme="light"] .empire-subtitle { color: #64748b; }
+        [data-theme="light"] .empire-body-text { color: #475569; }
+        [data-theme="light"] .empire-input {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        [data-theme="light"] .empire-input:focus { border-color: #7c3aed; }
+        [data-theme="light"] .empire-panel {
+            background-color: rgba(248, 250, 252, 0.9);
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-name-row {
+            background-color: rgba(248, 250, 252, 0.95);
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-legend-wrap {
+            background-color: rgba(241, 245, 249, 0.85);
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-dealer-grid {
+            background-color: rgba(241, 245, 249, 0.6);
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-new-btn {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #475569;
+        }
+        [data-theme="light"] .empire-new-btn:hover { background-color: #e2e8f0; }
+        [data-theme="light"] .empire-modal-backdrop { background-color: rgba(15, 23, 42, 0.35); }
+        [data-theme="light"] .empire-modal-panel {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-modal-heading { color: #0f172a; }
+        [data-theme="light"] .empire-modal-body { color: #475569; }
+        [data-theme="light"] .empire-modal-subtitle { color: #64748b; }
+        [data-theme="light"] .empire-modal-divider { border-color: #e2e8f0; }
+        [data-theme="light"] .empire-modal-cancel {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        [data-theme="light"] .empire-modal-cancel:hover { background-color: #e2e8f0; }
+        [data-theme="light"] .empire-results-table-wrap {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] .empire-results-thead { background-color: #f1f5f9; border-color: #e2e8f0; }
+        [data-theme="light"] .empire-results-th { color: #475569; }
+        [data-theme="light"] .empire-results-row { border-color: #e2e8f0; }
+        [data-theme="light"] .empire-results-row:hover { background-color: #f8fafc; }
+        [data-theme="light"] .empire-results-name { color: #1e293b; }
+        [data-theme="light"] .empire-results-slip { color: #6d28d9; }
     </style>
 </head>
-<body class="bg-amber-50 text-slate-800 antialiased min-h-screen flex flex-col" data-suite-current-app="empire">
+<body class="empire-app bg-slate-900 text-slate-100 min-h-screen flex flex-col select-none antialiased" data-suite-current-app="empire">
 
-    <header class="glass-header sticky top-0 z-40 border-b border-amber-200/80 px-3 md:px-4 py-2.5 flex justify-between items-center">
+    <header class="empire-topchrome glass-header sticky top-0 z-40 border-b border-amber-200/80 px-3 md:px-4 py-2.5 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2 min-w-0">
-            <a data-suite-href="portal" href="https://simpluri.com/" title="Back to Simpluri Apps" aria-label="Back to Simpluri Apps" class="shrink-0 p-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-amber-200">
+            <a data-suite-href="portal" href="https://simpluri.com/" data-i18n-title="back_to_simpluri" data-i18n-aria="back_to_simpluri" title="Back to Simpluri Apps" aria-label="Back to Simpluri Apps" class="shrink-0 p-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-200">
                 <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl shadow-sm ring-1 ring-amber-100 overflow-hidden bg-white">
                 <img src="/assets/favicon-empire.svg" alt="" class="w-full h-full" width="36" height="36" decoding="async"/>
             </div>
             <div class="min-w-0">
-                <div class="text-lg font-extrabold text-amber-700 tracking-tight leading-tight">Empire</div>
-                <div class="text-[11px] text-slate-500 font-medium hidden sm:block">Territory board game</div>
+                <div class="text-lg font-extrabold text-amber-700 tracking-tight leading-tight truncate">Empire</div>
+                <div class="text-[11px] text-slate-500 font-medium hidden sm:block truncate" data-i18n="app_subtitle">כיבוש מוחות · Party deduction</div>
             </div>
         </div>
         <div class="relative shrink-0">
@@ -53,25 +153,902 @@
                     <span class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg ring-1 ring-slate-100 bg-white"><img src="/assets/favicon-empire.svg" alt="" class="w-5 h-5" width="20" height="20" decoding="async"/></span>
                     <span class="font-bold text-amber-600 text-xs">Empire</span>
                 </a>
-                <a data-suite-href="empire" href="https://simpluri.com/apps/empire/empire.html" class="block px-4 py-2.5 text-sm text-amber-700 hover:bg-amber-50 font-medium">About Empire</a>
+                <div class="px-4 py-2 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="menu_language">שפה / Language</span>
+                    <div class="flex gap-1.5 text-xs font-extrabold" dir="ltr">
+                        <button type="button" onclick="changeLanguage('en')" id="suite-lang-en" class="text-slate-500 hover:text-amber-600 transition-colors">EN</button>
+                        <span class="text-slate-300">|</span>
+                        <button type="button" onclick="changeLanguage('he')" id="suite-lang-he" class="text-slate-500 hover:text-amber-600 transition-colors">HE</button>
+                    </div>
+                </div>
+                <div class="px-4 py-2 flex justify-between items-center bg-slate-50/50">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="menu_theme">מצב / Theme</span>
+                    <div class="flex gap-1.5 text-xs font-extrabold" dir="ltr">
+                        <button type="button" onclick="changeTheme('dark')" id="suite-theme-dark" class="text-slate-500 hover:text-amber-600 transition-colors">Dark</button>
+                        <span class="text-slate-300">|</span>
+                        <button type="button" onclick="changeTheme('light')" id="suite-theme-light" class="text-slate-500 hover:text-amber-600 transition-colors">Light</button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow flex items-center justify-center px-4 py-16">
-        <div class="max-w-lg w-full text-center">
-            <div class="inline-flex w-20 h-20 items-center justify-center rounded-3xl bg-white shadow-lg ring-1 ring-amber-100 mb-6">
-                <img src="/assets/favicon-empire.svg" alt="" class="w-14 h-14" width="56" height="56" decoding="async"/>
+    <main class="flex-1 min-h-0 flex items-center justify-center p-2 sm:p-4">
+    <div class="empire-game-shell main-layout w-full max-w-4xl bg-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-700 p-4 justify-between">
+        
+        <!-- שלב 0: הגדרת כמות שחקנים -->
+        <div id="step-count" class="my-auto space-y-6 max-w-sm mx-auto w-full">
+            <div class="text-center space-y-2">
+                <span class="text-5xl">🧠</span>
+                <h1 class="empire-heading text-2xl font-black text-violet-400" data-i18n="step_count_title">משחק הפתקים: כיבוש מוחות</h1>
+                <p class="empire-subtitle text-slate-400 text-sm" data-i18n="step_count_subtitle">המשחק הטקטי שבו מנחשים פתקים וכובשים שחקנים</p>
             </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3">Empire is loading its map</h1>
-            <p class="text-slate-600 mb-8 leading-relaxed">Game logic ships here next—territory links, dice combat, and multiplayer rooms. For now, explore the rules and vision on the marketing page.</p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <a data-suite-href="empire" href="https://simpluri.com/apps/empire/empire.html" class="inline-flex justify-center bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-full font-semibold shadow-md transition">Learn more</a>
-                <a data-suite-href="portal" href="https://simpluri.com/" class="inline-flex justify-center bg-white hover:bg-amber-50 text-slate-700 border border-amber-200 px-6 py-3 rounded-full font-semibold transition">Simpluri Apps</a>
+            <div class="space-y-3">
+                <button type="button" onclick="startNewGame()" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-base shadow-lg" data-i18n="btn_start_new_game">
+                    התחל משחק חדש
+                </button>
             </div>
         </div>
+
+        <!-- שלב 1: הזנת שמות השחקנים -->
+        <div id="step-names" class="hidden flex-1 flex flex-col justify-between overflow-hidden">
+            <div class="text-center shrink-0 mb-2">
+                <h2 class="empire-heading text-xl font-black text-violet-400" data-i18n="step_names_title">מי משחק?</h2>
+                <p class="empire-subtitle text-slate-400 text-xs" data-i18n="step_names_subtitle">הזינו את השמות של כל המשתתפים</p>
+            </div>
+            <div id="names-container" class="flex-1 overflow-y-auto space-y-2 my-2 px-1">
+                <!-- שדות השמות ייווצרו כאן -->
+            </div>
+            <button type="button" id="btn-add-player" onclick="addPlayerField()" class="empire-new-btn w-full py-2 mb-2 bg-slate-700 hover:bg-slate-650 text-slate-200 font-bold rounded-xl transition shrink-0 text-sm border border-slate-600" data-i18n="btn_add_player">
+                + הוסף שחקן
+            </button>
+            <button onclick="startEntry()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shrink-0 text-base" data-i18n="btn_start_entry">
+                התחל לאסוף פתקים ✍️
+            </button>
+        </div>
+
+        <!-- שלב 2: הזנת פתקים בסודיות -->
+        <div id="step-entry" class="hidden my-auto space-y-6 max-w-sm mx-auto w-full text-center">
+            <div class="empire-panel bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                <h2 id="entry-title" class="empire-heading text-xl font-black text-violet-400" data-i18n="entry_title_default">תור שחקן</h2>
+            </div>
+            
+            <div id="privacy-screen" class="space-y-4">
+                <p class="empire-body-text text-base text-slate-300"><span data-i18n="privacy_pass_device">העבירו את המכשיר ל:</span> <strong id="privacy-player-name" class="empire-heading text-violet-400 text-lg font-black"></strong></p>
+                <div id="privacy-color-indicator" class="w-8 h-8 rounded-full mx-auto border border-slate-600"></div>
+                <button onclick="revealEntryForm()" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition" data-i18n="btn_ready_write">
+                    אני מוכן לכתוב 🤫
+                </button>
+            </div>
+            
+            <div id="entry-form" class="hidden space-y-3">
+                <input type="text" id="char-input" data-i18n-ph="char_input_ph" placeholder="כתוב/י דמות או מושג..." 
+                       class="empire-input w-full p-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-center font-bold text-white focus:border-violet-500 focus:outline-none">
+                <button onclick="saveAndNext()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition" data-i18n="btn_save_continue">
+                    שמור והמשך 💾
+                </button>
+            </div>
+        </div>
+
+        <!-- שלב 3: לוח הדילר הגדול (מותאם למסך יחיד ללא גלילה) -->
+        <div id="step-dealer" class="hidden flex-1 flex flex-col overflow-hidden justify-between h-full">
+            
+            <!-- מקרא שחקנים מצומצם בראש המסך עם מונה מוחות פעילים -->
+            <div class="shrink-0 mb-2">
+                <div class="empire-legend-wrap flex flex-wrap gap-1.5 justify-center bg-slate-700/30 p-2 rounded-xl border border-slate-700/50" id="legend-container">
+                    <!-- מקרא שחקנים מעודכן עם מוני מוחות -->
+                </div>
+            </div>
+            
+            <!-- גריד צפוף וחסכוני במקום של כל הפתקים -->
+            <div id="dealer-list" class="empire-dealer-grid flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 p-1 bg-slate-900/40 rounded-xl border border-slate-700/30 content-start">
+                <!-- פתקים ייווצרו כאן -->
+            </div>
+
+            <!-- כפתורי שליטה בתחתית המסך -->
+            <div class="shrink-0 pt-2 flex gap-2">
+                <button onclick="openResultsModal()" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition" data-i18n="btn_reveal_sources">
+                    🔍 חשיפת המקורות
+                </button>
+                <button onclick="location.reload()" class="empire-new-btn py-2.5 px-4 bg-slate-700 hover:bg-slate-650 text-slate-300 font-bold rounded-xl text-xs sm:text-sm border border-slate-600 transition" data-i18n="btn_new_game">
+                    🔄 חדש
+                </button>
+            </div>
+        </div>
+
+    </div>
     </main>
 
+    <!-- מערכת מודאלים מותאמים אישית (מחליפים את ה-Alert וה-Confirm של הדפדפן) -->
+    
+    <!-- מודאל הודעה (Alert) -->
+    <div id="modal-alert" class="empire-modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="empire-modal-panel bg-slate-800 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 border border-slate-700">
+            <span class="text-3xl" id="modal-alert-icon">📢</span>
+            <h3 class="empire-heading text-lg font-bold text-violet-400" id="modal-alert-title" data-i18n="modal_alert_title_default">הודעה</h3>
+            <p class="empire-modal-body text-slate-300 text-sm" id="modal-alert-message"></p>
+            <button id="modal-alert-btn" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition" data-i18n="modal_alert_btn">הבנתי</button>
+        </div>
+    </div>
+
+    <!-- מודאל אישור (Confirm) -->
+    <div id="modal-confirm" class="empire-modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="empire-modal-panel bg-slate-800 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 border border-slate-700">
+            <span class="text-3xl" id="modal-confirm-icon">❓</span>
+            <h3 class="empire-modal-heading text-lg font-bold text-slate-100" id="modal-confirm-title" data-i18n="modal_confirm_title">האם אתה בטוח?</h3>
+            <p class="empire-modal-body text-slate-300 text-sm" id="modal-confirm-message"></p>
+            <div class="flex gap-2">
+                <button id="modal-confirm-yes" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition" data-i18n="modal_confirm_yes">כן</button>
+                <button id="modal-confirm-no" class="empire-modal-cancel flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-xl transition" data-i18n="modal_confirm_no">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודאל שריפה וכיבוש מוחות -->
+    <div id="modal-burn-flow" class="empire-modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="empire-modal-panel bg-slate-800 rounded-2xl max-w-sm w-full p-5 text-center space-y-3 border border-slate-700 max-h-[90vh] flex flex-col">
+            <div class="shrink-0 space-y-0.5">
+                <span class="text-2xl" id="burn-flow-icon">✍️</span>
+                <h3 class="empire-modal-heading text-lg font-bold text-slate-100" id="burn-flow-title" data-i18n="burn_flow_title_default">מי כתב?</h3>
+                <p class="empire-modal-subtitle text-slate-400 text-xs" id="burn-flow-subtitle"></p>
+            </div>
+            <div id="burn-flow-list" class="flex-1 overflow-y-auto space-y-1.5 p-1">
+                <!-- כפתורי בחירה דינמיים -->
+            </div>
+            <div class="empire-modal-divider shrink-0 pt-2 border-t border-slate-700">
+                <button onclick="closeCustomModal('modal-burn-flow')" class="empire-modal-cancel w-full py-2 bg-slate-700 hover:bg-slate-650 text-slate-300 font-bold rounded-xl transition text-sm" data-i18n="burn_cancel">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודאל חשיפת המקורות הצף (חוסך מקום במסך הראשי) -->
+    <div id="modal-results" class="empire-modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="empire-modal-panel bg-slate-800 rounded-2xl max-w-md w-full p-5 text-center space-y-4 border border-slate-700 max-h-[85vh] flex flex-col">
+            <h3 class="text-lg font-bold text-amber-400 shrink-0" data-i18n="results_title">מי באמת כתב מה? 🤔</h3>
+            <div class="empire-results-table-wrap flex-1 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900">
+                <table class="w-full text-start border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="empire-results-thead bg-slate-800 border-b border-slate-700">
+                            <th class="empire-results-th p-2 font-bold text-slate-300" data-i18n="results_col_author">הכותב</th>
+                            <th class="empire-results-th p-2 font-bold text-slate-300" data-i18n="results_col_slip">הפתק שלו</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+            </div>
+            <button onclick="closeCustomModal('modal-results')" class="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-sm shrink-0" data-i18n="results_close">סגור חלונית</button>
+        </div>
+    </div>
+
     <script src="/assets/simpluri-menu.js"></script>
+    <script>
+        // ================= MULTI-LANGUAGE (i18n) =================
+        const translations = {
+            he: {
+                page_title: "Empire — כיבוש מוחות",
+                meta_description: "Empire — משחק הפתקים לכיבוש מוחות. הזינו דמויות בסוד, גלו את הרשימה, ונחשו מי כתב מה עד שמישהו שולט בכולם.",
+                app_subtitle: "כיבוש מוחות · Party deduction",
+                back_to_simpluri: "חזרה ל-Simpluri Apps",
+                menu_language: "שפה / Language",
+                menu_theme: "מצב / Theme",
+                step_count_title: "משחק הפתקים: כיבוש מוחות",
+                step_count_subtitle: "המשחק הטקטי שבו מנחשים פתקים וכובשים שחקנים",
+                btn_start_new_game: "התחל משחק חדש",
+                step_names_title: "מי משחק?",
+                step_names_subtitle: "הוסיפו שחקנים ומלאו את השמות (2–20)",
+                btn_add_player: "+ הוסף שחקן",
+                btn_remove_player: "הסר שחקן",
+                alert_max_players_title: "מקסימום שחקנים",
+                alert_max_players_msg: "ניתן להוסיף עד 20 שחקנים",
+                btn_start_entry: "התחל לאסוף פתקים ✍️",
+                entry_title_default: "תור שחקן",
+                entry_turn: "תור של: {name}",
+                privacy_pass_device: "העבירו את המכשיר ל:",
+                btn_ready_write: "אני מוכן לכתוב 🤫",
+                char_input_ph: "כתוב/י דמות או מושג...",
+                btn_save_continue: "שמור והמשך 💾",
+                btn_reveal_sources: "🔍 חשיפת המקורות",
+                btn_new_game: "🔄 חדש",
+                modal_alert_title_default: "הודעה",
+                modal_alert_btn: "הבנתי",
+                modal_confirm_title: "האם אתה בטוח?",
+                modal_confirm_yes: "כן",
+                modal_confirm_no: "ביטול",
+                burn_flow_title_default: "מי כתב?",
+                burn_cancel: "ביטול",
+                results_title: "מי באמת כתב מה? 🤔",
+                results_col_author: "הכותב",
+                results_col_slip: "הפתק שלו",
+                results_close: "סגור חלונית",
+                alert_min_players_title: "אופס!",
+                alert_min_players_msg: "לפחות 2 שחקנים",
+                player_name_ph: "שם שחקן {n}",
+                alert_missing_names_title: "חסרים שמות",
+                alert_missing_names_msg: "נא למלא את כל השמות",
+                alert_empty_slip_title: "פתק ריק",
+                alert_empty_slip_msg: "רשמו דמות כלשהי",
+                alert_saved_title: "נשמר!",
+                alert_saved_msg: "העבירו את המכשיר ל-{name}",
+                alert_ready_title: "מוכן!",
+                alert_ready_msg: "העבירו את הטלפון לדילר",
+                undo_burn_title: "ביטול שריפה?",
+                undo_burn_msg: 'האם לבטל את השריפה של הפתק "{name}"? (זה יאפס את הבעלות עליו)',
+                burn_step1_title: "שלב א': של מי הפתק?",
+                burn_step1_subtitle: 'בחרו מי השחקן שכתב את הפתק: "{name}"',
+                burn_step2_title: "שלב ב': מי ניחש נכון?",
+                burn_step2_subtitle: 'מי המנחש שקיבל את המוח של "{name}"?',
+                win_title: "🏆 יש לנו מנצח מוחלט!",
+                win_msg: "כל הכבוד ל{name} שכבש את כל המוחות על הלוח וניצח את המשחק!",
+                reveal_confirm1_title: "⚠️ חשיפת מקורות סודית",
+                reveal_confirm1_msg: "האם אתם בטוחים שברצונכם לחשוף מי כתב מה? פעולה זו תגלה את כל המוחות ותסיים את מסתורין המשחק באופן מיידי!",
+                reveal_confirm2_title: "🛑 אזהרה אחרונה בהחלט!",
+                reveal_confirm2_msg: "אין דרך חזרה! האם כל המשתתפים מסכימים לחשוף את הפתקים ולוח הבעלויות ברגע זה?",
+                card_by: "✍️ של:",
+                card_mind: "👑 מוח:"
+            },
+            en: {
+                page_title: "Empire — Mind Conquest",
+                meta_description: "Empire — the party slip game. Submit secret characters, reveal the roster, and guess who wrote what until one player rules everyone.",
+                app_subtitle: "Mind conquest · Party deduction",
+                back_to_simpluri: "Back to Simpluri Apps",
+                menu_language: "Language / שפה",
+                menu_theme: "Theme / מצב",
+                step_count_title: "Empire: Mind Conquest",
+                step_count_subtitle: "The tactical game of guessing slips and capturing players",
+                btn_start_new_game: "Start new game",
+                step_names_title: "Who's playing?",
+                step_names_subtitle: "Add players and enter names (2–20)",
+                btn_add_player: "+ Add player",
+                btn_remove_player: "Remove player",
+                alert_max_players_title: "Maximum players",
+                alert_max_players_msg: "You can add up to 20 players",
+                btn_start_entry: "Start collecting slips ✍️",
+                entry_title_default: "Player turn",
+                entry_turn: "Turn: {name}",
+                privacy_pass_device: "Pass the device to:",
+                btn_ready_write: "I'm ready to write 🤫",
+                char_input_ph: "Enter a character or concept...",
+                btn_save_continue: "Save and continue 💾",
+                btn_reveal_sources: "🔍 Reveal sources",
+                btn_new_game: "🔄 New game",
+                modal_alert_title_default: "Notice",
+                modal_alert_btn: "Got it",
+                modal_confirm_title: "Are you sure?",
+                modal_confirm_yes: "Yes",
+                modal_confirm_no: "Cancel",
+                burn_flow_title_default: "Who wrote it?",
+                burn_cancel: "Cancel",
+                results_title: "Who really wrote what? 🤔",
+                results_col_author: "Author",
+                results_col_slip: "Their slip",
+                results_close: "Close",
+                alert_min_players_title: "Oops!",
+                alert_min_players_msg: "At least 2 players",
+                player_name_ph: "Player {n} name",
+                alert_missing_names_title: "Missing names",
+                alert_missing_names_msg: "Please fill in all names",
+                alert_empty_slip_title: "Empty slip",
+                alert_empty_slip_msg: "Enter a character",
+                alert_saved_title: "Saved!",
+                alert_saved_msg: "Pass the device to {name}",
+                alert_ready_title: "Ready!",
+                alert_ready_msg: "Pass the phone to the dealer",
+                undo_burn_title: "Undo burn?",
+                undo_burn_msg: 'Undo the burn for "{name}"? (This resets ownership)',
+                burn_step1_title: "Step 1: Whose slip?",
+                burn_step1_subtitle: 'Who wrote the slip: "{name}"?',
+                burn_step2_title: "Step 2: Who guessed correctly?",
+                burn_step2_subtitle: 'Who captured the mind for "{name}"?',
+                win_title: "🏆 We have an absolute winner!",
+                win_msg: "Congratulations to {name} for conquering every mind on the board!",
+                reveal_confirm1_title: "⚠️ Secret reveal",
+                reveal_confirm1_msg: "Are you sure you want to reveal who wrote what? This exposes all minds and ends the mystery immediately!",
+                reveal_confirm2_title: "🛑 Last warning!",
+                reveal_confirm2_msg: "No going back! Does everyone agree to reveal the slips and ownership board now?",
+                card_by: "✍️ By:",
+                card_mind: "👑 Mind:"
+            }
+        };
+
+        let currentLang = localStorage.getItem('empire_lang') || 'he';
+        let currentTheme = localStorage.getItem('empire_theme') || 'dark';
+
+        function themeClasses(dark, light) {
+            return currentTheme === 'light' ? light : dark;
+        }
+
+        function changeTheme(theme) {
+            currentTheme = theme === 'light' ? 'light' : 'dark';
+            localStorage.setItem('empire_theme', currentTheme);
+            if (window.SimpluriMenu) window.SimpluriMenu.closeAllSuiteMenus();
+
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', currentTheme === 'light' ? '#fffbeb' : '#6200ee');
+
+            var btnDark = document.getElementById('suite-theme-dark');
+            var btnLight = document.getElementById('suite-theme-light');
+            if (btnDark && btnLight) {
+                btnDark.className = currentTheme === 'dark' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+                btnLight.className = currentTheme === 'light' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+            }
+
+            if (!document.getElementById('step-names').classList.contains('hidden') && document.querySelectorAll('.name-input').length) {
+                renderNameFields(getNameFieldCount());
+            }
+            if (players.length && !document.getElementById('step-entry').classList.contains('hidden')) {
+                showPrivacyScreen();
+            }
+            if (!document.getElementById('step-dealer').classList.contains('hidden')) {
+                renderDealerList();
+            }
+        }
+
+        function t(key, vars) {
+            var str = (translations[currentLang] && translations[currentLang][key]) || translations.he[key] || key;
+            if (vars) {
+                Object.keys(vars).forEach(function (k) {
+                    str = str.replace('{' + k + '}', vars[k]);
+                });
+            }
+            return str;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('empire_lang', lang);
+            if (window.SimpluriMenu) window.SimpluriMenu.closeAllSuiteMenus();
+
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+
+            var btnEn = document.getElementById('suite-lang-en');
+            var btnHe = document.getElementById('suite-lang-he');
+            if (btnEn && btnHe) {
+                btnEn.className = lang === 'en' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+                btnHe.className = lang === 'he' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+            }
+
+            if (translations[lang].page_title) document.title = translations[lang].page_title;
+            var metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc && translations[lang].meta_description) metaDesc.setAttribute('content', translations[lang].meta_description);
+
+            document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerText = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n-ph');
+                if (translations[lang][key]) el.placeholder = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n-title');
+                if (translations[lang][key]) el.title = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n-aria');
+                if (translations[lang][key]) el.setAttribute('aria-label', translations[lang][key]);
+            });
+
+            if (players.length && !document.getElementById('step-entry').classList.contains('hidden')) {
+                showPrivacyScreen();
+            }
+            if (!document.getElementById('step-dealer').classList.contains('hidden')) {
+                renderDealerList();
+            }
+            if (!document.getElementById('step-names').classList.contains('hidden')) {
+                var count = getNameFieldCount();
+                if (count) renderNameFields(count);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            changeTheme(currentTheme);
+            changeLanguage(currentLang);
+        });
+        // =========================================================
+
+        // רישום Service Worker פנימי ישירות דרך קוד ה-HTML כדי לתמוך ב-PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swContent = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', (e) => {});
+                `;
+                const blob = new Blob([swContent], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(url).catch(err => console.log('PWA SW Registration Failed:', err));
+            });
+        }
+
+        // בנק פלטות צבעים קטנות ויוקרתיות לשחקנים (טקסט ורקע תואמים)
+        const PLAYER_COLORS = [
+            { bg: 'bg-red-950/40', text: 'text-red-300', border: 'border-red-800/60', btn: 'bg-red-900/30 hover:bg-red-900/50 text-red-200 border-red-800', dot: 'bg-red-500', activeBg: 'bg-red-900/80', hex: '#ef4444' },
+            { bg: 'bg-blue-950/40', text: 'text-blue-300', border: 'border-blue-800/60', btn: 'bg-blue-900/30 hover:bg-blue-900/50 text-blue-200 border-blue-800', dot: 'bg-blue-500', activeBg: 'bg-blue-900/80', hex: '#3b82f6' },
+            { bg: 'bg-emerald-950/40', text: 'text-emerald-300', border: 'border-emerald-800/60', btn: 'bg-emerald-900/30 hover:bg-emerald-900/50 text-emerald-200 border-emerald-800', dot: 'bg-emerald-500', activeBg: 'bg-emerald-900/80', hex: '#10b981' },
+            { bg: 'bg-amber-950/40', text: 'text-amber-300', border: 'border-amber-800/60', btn: 'bg-amber-900/30 hover:bg-amber-900/50 text-amber-200 border-amber-800', dot: 'bg-amber-500', activeBg: 'bg-amber-900/80', hex: '#f59e0b' },
+            { bg: 'bg-fuchsia-950/40', text: 'text-fuchsia-300', border: 'border-fuchsia-800/60', btn: 'bg-fuchsia-900/30 hover:bg-fuchsia-900/50 text-fuchsia-200 border-fuchsia-800', dot: 'bg-fuchsia-500', activeBg: 'bg-fuchsia-900/80', hex: '#d946ef' },
+            { bg: 'bg-orange-950/40', text: 'text-orange-300', border: 'border-orange-800/60', btn: 'bg-orange-900/30 hover:bg-orange-900/50 text-orange-200 border-orange-800', dot: 'bg-orange-500', activeBg: 'bg-orange-900/80', hex: '#f97316' },
+            { bg: 'bg-sky-950/40', text: 'text-sky-300', border: 'border-sky-800/60', btn: 'bg-sky-900/30 hover:bg-sky-900/50 text-sky-200 border-sky-800', dot: 'bg-sky-500', activeBg: 'bg-sky-900/80', hex: '#0ea5e9' },
+            { bg: 'bg-purple-950/40', text: 'text-purple-300', border: 'border-purple-800/60', btn: 'bg-purple-900/30 hover:bg-purple-900/50 text-purple-200 border-purple-800', dot: 'bg-purple-500', activeBg: 'bg-purple-900/80', hex: '#a855f7' }
+        ];
+
+        const PLAYER_COLORS_LIGHT = [
+            { bg: 'bg-red-100', text: 'text-red-900', border: 'border-red-300', btn: 'bg-red-50 hover:bg-red-100 text-red-900 border-red-200', dot: 'bg-red-500', activeBg: 'bg-red-200', hex: '#ef4444' },
+            { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300', btn: 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200', dot: 'bg-blue-500', activeBg: 'bg-blue-200', hex: '#3b82f6' },
+            { bg: 'bg-emerald-100', text: 'text-emerald-900', border: 'border-emerald-300', btn: 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200', dot: 'bg-emerald-500', activeBg: 'bg-emerald-200', hex: '#10b981' },
+            { bg: 'bg-amber-100', text: 'text-amber-900', border: 'border-amber-300', btn: 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200', dot: 'bg-amber-500', activeBg: 'bg-amber-200', hex: '#f59e0b' },
+            { bg: 'bg-fuchsia-100', text: 'text-fuchsia-900', border: 'border-fuchsia-300', btn: 'bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200', dot: 'bg-fuchsia-500', activeBg: 'bg-fuchsia-200', hex: '#d946ef' },
+            { bg: 'bg-orange-100', text: 'text-orange-900', border: 'border-orange-300', btn: 'bg-orange-50 hover:bg-orange-100 text-orange-900 border-orange-200', dot: 'bg-orange-500', activeBg: 'bg-orange-200', hex: '#f97316' },
+            { bg: 'bg-sky-100', text: 'text-sky-900', border: 'border-sky-300', btn: 'bg-sky-50 hover:bg-sky-100 text-sky-900 border-sky-200', dot: 'bg-sky-500', activeBg: 'bg-sky-200', hex: '#0ea5e9' },
+            { bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-300', btn: 'bg-purple-50 hover:bg-purple-100 text-purple-900 border-purple-200', dot: 'bg-purple-500', activeBg: 'bg-purple-200', hex: '#a855f7' }
+        ];
+
+        function colorPalette() {
+            return currentTheme === 'light' ? PLAYER_COLORS_LIGHT : PLAYER_COLORS;
+        }
+
+        function colorForIndex(index) {
+            var palette = colorPalette();
+            return palette[index % palette.length];
+        }
+
+        let players = []; 
+        let characters = []; 
+        let shuffledList = []; 
+        let currentIndex = 0; 
+        
+        let activeCardIndexForBurn = null;
+        let burnFlowStep = 1; 
+        let selectedAuthorName = "";
+
+        // זיכרון הבעלויות וההיסטוריה (לפתרון באג שרשראות הכיבוש ומניעת מעגלים)
+        let parentMap = {};
+        let conquestHistory = [];
+
+        // פונקציות ניהול המודאלים המובנים
+        function showCustomAlert(title, message, icon = "📢", callback = null) {
+            document.getElementById('modal-alert-title').innerText = title;
+            document.getElementById('modal-alert-message').innerText = message;
+            document.getElementById('modal-alert-icon').innerText = icon;
+            const modal = document.getElementById('modal-alert');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('modal-alert-btn').onclick = function() {
+                modal.classList.add('hidden'); modal.classList.remove('flex');
+                if (callback) callback();
+            };
+        }
+
+        function showCustomConfirm(title, message, onConfirm, onCancel = null, icon = "❓") {
+            document.getElementById('modal-confirm-title').innerText = title;
+            document.getElementById('modal-confirm-message').innerText = message;
+            document.getElementById('modal-confirm-icon').innerText = icon;
+            const modal = document.getElementById('modal-confirm');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('modal-confirm-yes').onclick = function() {
+                modal.classList.add('hidden'); modal.classList.remove('flex');
+                if (onConfirm) onConfirm();
+            };
+            document.getElementById('modal-confirm-no').onclick = function() {
+                modal.classList.add('hidden'); modal.classList.remove('flex');
+                if (onCancel) onCancel();
+            };
+        }
+
+        function openCustomModal(modalId) {
+            const m = document.getElementById(modalId);
+            m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeCustomModal(modalId) {
+            const m = document.getElementById(modalId);
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
+        const MIN_PLAYERS = 2;
+        const MAX_PLAYERS = 20;
+
+        function escapeAttr(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        }
+
+        function getNameFieldCount() {
+            return document.querySelectorAll('.name-input').length;
+        }
+
+        function collectNameValues() {
+            return Array.from(document.querySelectorAll('.name-input')).map(function (el) { return el.value; });
+        }
+
+        function updateAddPlayerButton() {
+            var btn = document.getElementById('btn-add-player');
+            if (!btn) return;
+            var count = getNameFieldCount();
+            var atMax = count >= MAX_PLAYERS;
+            btn.disabled = atMax;
+            btn.classList.toggle('opacity-50', atMax);
+            btn.classList.toggle('cursor-not-allowed', atMax);
+        }
+
+        function renderNameFields(count, values) {
+            count = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, count));
+            if (values === undefined) values = collectNameValues();
+            while (values.length < count) values.push('');
+            values = values.slice(0, count);
+
+            var container = document.getElementById('names-container');
+            var canRemove = count > MIN_PLAYERS;
+            container.innerHTML = '';
+
+            for (var i = 1; i <= count; i++) {
+                var cObj = colorForIndex(i - 1);
+                var removeBtn = canRemove
+                    ? '<button type="button" onclick="removePlayerField(' + (i - 1) + ')" class="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-600/50 transition" aria-label="' + escapeAttr(t('btn_remove_player')) + '">✕</button>'
+                    : '';
+                container.innerHTML += `
+                    <div class="empire-name-row flex items-center gap-2 bg-slate-700/40 p-2 rounded-xl border border-slate-600">
+                        <span class="w-4 h-4 rounded-full shrink-0 ${cObj.dot}"></span>
+                        <input type="text" value="${escapeAttr(values[i - 1] || '')}" placeholder="${escapeAttr(t('player_name_ph', { n: i }))}" class="empire-input name-input w-full p-2 bg-slate-800 border border-slate-600 rounded-lg focus:border-violet-500 focus:outline-none text-start text-sm font-semibold text-white">
+                        ${removeBtn}
+                    </div>
+                `;
+            }
+            updateAddPlayerButton();
+        }
+
+        function startNewGame() {
+            renderNameFields(MIN_PLAYERS, ['', '']);
+            showStep('step-names');
+        }
+
+        function addPlayerField() {
+            var count = getNameFieldCount();
+            if (count >= MAX_PLAYERS) {
+                return showCustomAlert(t('alert_max_players_title'), t('alert_max_players_msg'), "⚠️");
+            }
+            renderNameFields(count + 1);
+            var inputs = document.querySelectorAll('.name-input');
+            if (inputs.length) inputs[inputs.length - 1].focus();
+        }
+
+        function removePlayerField(index) {
+            var values = collectNameValues();
+            if (values.length <= MIN_PLAYERS) return;
+            values.splice(index, 1);
+            renderNameFields(values.length, values);
+        }
+
+        function startEntry() {
+            const inputs = document.querySelectorAll('.name-input');
+            if (inputs.length < MIN_PLAYERS) {
+                return showCustomAlert(t('alert_min_players_title'), t('alert_min_players_msg'), "⚠️");
+            }
+            players = [];
+            for (let i = 0; i < inputs.length; i++) {
+                const name = inputs[i].value.trim();
+                if (!name) return showCustomAlert(t('alert_missing_names_title'), t('alert_missing_names_msg'), "✍️");
+                players.push({ name: name, colorIndex: i % PLAYER_COLORS.length });
+            }
+            currentIndex = 0;
+            showPrivacyScreen();
+            showStep('step-entry');
+        }
+
+        // הגנת פרטיות
+        function showPrivacyScreen() {
+            const p = players[currentIndex];
+            const cObj = colorForIndex(p.colorIndex);
+            document.getElementById('privacy-player-name').innerText = p.name;
+            document.getElementById('entry-title').innerText = t('entry_turn', { name: p.name });
+            document.getElementById('privacy-color-indicator').className = `w-6 h-6 rounded-full mx-auto border-2 ${themeClasses('border-slate-500', 'border-slate-300')} ${cObj.dot}`;
+            document.getElementById('entry-form').classList.add('hidden');
+            document.getElementById('privacy-screen').classList.remove('hidden');
+        }
+
+        function revealEntryForm() {
+            document.getElementById('privacy-screen').classList.add('hidden');
+            document.getElementById('entry-form').classList.remove('hidden');
+            const i = document.getElementById('char-input'); i.value = ''; i.focus();
+        }
+
+        function saveAndNext() {
+            const i = document.getElementById('char-input');
+            const val = i.value.trim();
+            if (!val) return showCustomAlert(t('alert_empty_slip_title'), t('alert_empty_slip_msg'), "✏️");
+            
+            characters.push(val);
+            currentIndex++;
+            
+            if (currentIndex < players.length) {
+                showCustomAlert(t('alert_saved_title'), t('alert_saved_msg', { name: players[currentIndex].name }), "✅", showPrivacyScreen);
+            } else {
+                showCustomAlert(t('alert_ready_title'), t('alert_ready_msg'), "🎉", initDealerMode);
+            }
+        }
+
+        function initDealerMode() {
+            shuffledList = characters.map((c, index) => ({
+                name: c,
+                originalPlayerName: players[index].name, 
+                isBurnt: false,
+                author: "", 
+                guesser: "", 
+                currentOwner: "" 
+            })).sort(() => Math.random() - 0.5);
+            
+            // איפוס היסטוריית הכיבושים למשחק חדש
+            conquestHistory = [];
+            parentMap = {};
+            players.forEach(p => { parentMap[p.name] = null; });
+
+            renderDealerList();
+            showStep('step-dealer');
+        }
+
+        // ציור המקרא העליון עם חישוב המוחות הפעילים
+        function renderLegend() {
+            const legend = document.getElementById('legend-container');
+            legend.innerHTML = players.map(p => {
+                const cObj = colorForIndex(p.colorIndex);
+                let activeMindsCount = 0;
+                players.forEach(pl => {
+                    if (getRoot(pl.name) === p.name) {
+                        activeMindsCount++;
+                    }
+                });
+
+                return `
+                    <div class="flex items-center gap-1.5 px-2 py-1 rounded-xl ${cObj.bg} ${cObj.text} text-[10px] sm:text-xs font-bold border ${cObj.border} transition-all duration-300">
+                        <span class="w-2 h-2 rounded-full ${cObj.dot}"></span>
+                        <span class="truncate max-w-[60px] sm:max-w-[90px]">${p.name}</span>
+                        <span class="${themeClasses('bg-slate-950/60 text-white', 'bg-slate-200 text-slate-800')} px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] flex items-center gap-0.5 font-black">
+                            🧠 ${activeMindsCount}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ציור הכרטיסיות
+        function renderDealerList() {
+            // עדכון המקרא בראש המסך
+            renderLegend();
+
+            const container = document.getElementById('dealer-list');
+            container.innerHTML = '';
+            
+            shuffledList.forEach((item, index) => {
+                const card = document.createElement('div');
+                
+                if (item.isBurnt) {
+                    const ownerPlayer = players.find(p => p.name === item.currentOwner);
+                    const col = ownerPlayer ? colorForIndex(ownerPlayer.colorIndex) : (currentTheme === 'light'
+                        ? { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-300' }
+                        : { bg: 'bg-slate-700', text: 'text-slate-400', border: 'border-slate-600' });
+                    const metaBy = themeClasses('bg-slate-900/35', 'bg-slate-900/8');
+                    const metaMind = themeClasses('bg-white/10', 'bg-slate-900/10');
+                    
+                    card.className = `${col.bg} ${col.text} ${col.border} border-2 p-1.5 rounded-xl shadow-inner text-center cursor-pointer transition flex flex-col justify-between items-center h-[80px] text-xs font-semibold overflow-hidden`;
+                    card.innerHTML = `
+                        <span class="line-through opacity-70 font-bold block truncate w-full text-[13px] leading-snug py-0.5">${item.name}</span>
+                        <div class="w-full space-y-0.5 text-[9px] shrink-0 mt-auto">
+                            <span class="block ${metaBy} rounded py-0.5 truncate px-1">${t('card_by')} ${item.author}</span>
+                            <span class="block ${metaMind} rounded py-0.5 font-bold truncate px-1">${t('card_mind')} ${item.currentOwner}</span>
+                        </div>
+                    `;
+                } else {
+                    card.className = themeClasses(
+                        "bg-slate-700 hover:bg-slate-650 border border-slate-600 p-2 rounded-xl text-center font-bold text-sm text-slate-100 cursor-pointer transition flex items-center justify-center h-[80px] active:scale-95 shadow-sm overflow-hidden text-ellipsis leading-snug",
+                        "bg-white hover:bg-slate-50 border border-slate-200 p-2 rounded-xl text-center font-bold text-sm text-slate-800 cursor-pointer transition flex items-center justify-center h-[80px] active:scale-95 shadow-sm overflow-hidden text-ellipsis leading-snug"
+                    );
+                    card.innerText = item.name;
+                }
+                
+                card.onclick = () => handleCardClick(index);
+                container.appendChild(card);
+            });
+            
+            checkWinCondition();
+        }
+
+        function handleCardClick(index) {
+            const item = shuffledList[index];
+            if (item.isBurnt) {
+                showCustomConfirm(
+                    t('undo_burn_title'),
+                    t('undo_burn_msg', { name: item.name }),
+                    () => {
+                        // הסרת הניחוש מההיסטוריה
+                        conquestHistory = conquestHistory.filter(h => !(h.author === item.author && h.guesser === item.guesser));
+                        
+                        item.isBurnt = false; 
+                        item.author = ""; 
+                        item.guesser = ""; 
+                        item.currentOwner = "";
+                        
+                        applyChainReaction(); 
+                        renderDealerList();
+                    }
+                );
+            } else {
+                activeCardIndexForBurn = index;
+                startBurnFlow();
+            }
+        }
+
+        function startBurnFlow() {
+            burnFlowStep = 1;
+            const item = shuffledList[activeCardIndexForBurn];
+            document.getElementById('burn-flow-icon').innerText = "✍️";
+            document.getElementById('burn-flow-title').innerText = t('burn_step1_title');
+            document.getElementById('burn-flow-subtitle').innerText = t('burn_step1_subtitle', { name: item.name });
+            renderBurnFlowList();
+            openCustomModal('modal-burn-flow');
+        }
+
+        function renderBurnFlowList() {
+            const container = document.getElementById('burn-flow-list');
+            container.innerHTML = '';
+            players.forEach(p => {
+                const cObj = colorForIndex(p.colorIndex);
+                const btn = document.createElement('button');
+                btn.className = `w-full py-2 px-3 rounded-xl border text-xs font-bold text-start transition active:scale-95 ${cObj.btn}`;
+                btn.innerHTML = `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full ${cObj.dot}"></span><span>${p.name}</span></div>`;
+                btn.onclick = () => handleBurnFlowSelection(p);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleBurnFlowSelection(selectedPlayer) {
+            const item = shuffledList[activeCardIndexForBurn];
+            
+            if (burnFlowStep === 1) {
+                selectedAuthorName = selectedPlayer.name;
+                
+                burnFlowStep = 2;
+                document.getElementById('burn-flow-icon').innerText = "🎯";
+                document.getElementById('burn-flow-title').innerText = t('burn_step2_title');
+                document.getElementById('burn-flow-subtitle').innerText = t('burn_step2_subtitle', { name: item.name });
+                renderBurnFlowList();
+            } else if (burnFlowStep === 2) {
+                item.isBurnt = true;
+                item.author = selectedAuthorName; 
+                item.guesser = selectedPlayer.name; 
+                
+                // הוספת הניחוש הכרונולוגי להיסטוריה
+                conquestHistory.push({ author: selectedAuthorName, guesser: selectedPlayer.name });
+                
+                closeCustomModal('modal-burn-flow');
+                activeCardIndexForBurn = null;
+                
+                applyChainReaction();
+                renderDealerList();
+            }
+        }
+
+        // אלגוריתם הפיכת העץ והתרת מעגלי הכיבוש
+        function recalculateConquests() {
+            // 1. אתחול מחדש של מפת הבעלויות
+            parentMap = {};
+            players.forEach(p => {
+                parentMap[p.name] = null;
+            });
+
+            // 2. עיבוד כל הכיבושים בסדר הכרונולוגי שבו קרו בפועל
+            conquestHistory.forEach(conquest => {
+                const author = conquest.author;
+                const guesser = conquest.guesser;
+                
+                // בדיקה האם הכותב הוא "אב קדמון" של המנחש (סגירת מעגל כיבוש)
+                let isAncestor = false;
+                let curr = parentMap[guesser];
+                while (curr) {
+                    if (curr === author) {
+                        isAncestor = true;
+                        break;
+                    }
+                    curr = parentMap[curr];
+                }
+
+                if (isAncestor) {
+                    // המנחש משתחרר מהשעבוד ומהפך את השרשת תחתיו
+                    let currNode = guesser;
+                    let prevNode = null;
+                    while (currNode !== author) {
+                        let nextNode = parentMap[currNode];
+                        parentMap[currNode] = prevNode;
+                        prevNode = currNode;
+                        currNode = nextNode;
+                    }
+                    parentMap[author] = prevNode;
+                } else {
+                    // כיבוש לינארי רגיל
+                    parentMap[author] = guesser;
+                }
+            });
+        }
+
+        // מציאת השחקן העצמאי שמחזיק בשרשרת הפיקוד
+        function getRoot(name) {
+            let curr = name;
+            let visited = new Set();
+            while (parentMap[curr]) {
+                if (visited.has(curr)) {
+                    break;
+                }
+                visited.add(curr);
+                curr = parentMap[curr];
+            }
+            return curr;
+        }
+
+        function applyChainReaction() {
+            // חישוב מחדש של עץ הבעלויות
+            recalculateConquests();
+
+            // שיוך הבעלים הסופי לכל כרטיסייה שרופה
+            shuffledList.forEach(card => {
+                if (card.isBurnt) {
+                    card.currentOwner = getRoot(card.guesser);
+                } else {
+                    card.currentOwner = "";
+                }
+            });
+        }
+
+        // בדיקת ניצחון
+        function checkWinCondition() {
+            const burntCards = shuffledList.filter(c => c.isBurnt);
+            if (burntCards.length === shuffledList.length && shuffledList.length > 0) {
+                const firstOwner = burntCards[0].currentOwner;
+                const singleWinner = burntCards.every(c => c.currentOwner === firstOwner);
+                
+                if (singleWinner) {
+                    setTimeout(() => {
+                        showCustomAlert(t('win_title'), t('win_msg', { name: firstOwner }), "👑");
+                    }, 400);
+                }
+            }
+        }
+
+        // חשיפת המקורות עם אבטחה דו-שלבית מיוחדת (Double Confirmation)
+        function openResultsModal() {
+            showCustomConfirm(
+                t('reveal_confirm1_title'),
+                t('reveal_confirm1_msg'),
+                () => {
+                    showCustomConfirm(
+                        t('reveal_confirm2_title'),
+                        t('reveal_confirm2_msg'),
+                        () => {
+                            const body = document.getElementById('results-body');
+                            body.innerHTML = players.map((p, i) => `
+                                <tr class="empire-results-row border-b border-slate-700 hover:bg-slate-800 transition">
+                                    <td class="p-2 font-bold empire-results-name text-slate-200 flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full ${colorForIndex(p.colorIndex).dot}"></span>
+                                        <span>${p.name}</span>
+                                    </td>
+                                    <td class="p-2 font-semibold empire-results-slip text-violet-400">${characters[i]}</td>
+                                </tr>
+                            `).join('');
+                            openCustomModal('modal-results');
+                        },
+                        null,
+                        "🛑"
+                    );
+                },
+                null,
+                "⚠️"
+            );
+        }
+
+        function showStep(stepId) {
+            document.getElementById('step-count').classList.add('hidden');
+            document.getElementById('step-names').classList.add('hidden');
+            document.getElementById('step-entry').classList.add('hidden');
+            document.getElementById('step-dealer').classList.add('hidden');
+            document.getElementById(stepId).classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
