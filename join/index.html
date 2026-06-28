@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script>
+        (function () {
+            var lang = localStorage.getItem('empire_lang') || 'he';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('empire_theme') || 'dark');
+        })();
+    </script>
+    <meta name="theme-color" content="#6200ee">
+    <title>Empire — Join game</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon-empire.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Assistant', sans-serif; touch-action: manipulation; }
+        .empire-topchrome { font-family: 'Heebo', 'Assistant', sans-serif; }
+        .glass-header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        [data-theme="light"] body.empire-app { background-color: #fffbeb; color: #1e293b; }
+        [data-theme="light"] .empire-game-shell { background-color: #ffffff; border-color: #e2e8f0; }
+        [data-theme="light"] .empire-heading { color: #6d28d9; }
+        [data-theme="light"] .empire-subtitle { color: #64748b; }
+        [data-theme="light"] .empire-body-text { color: #475569; }
+        [data-theme="light"] .empire-input { background-color: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+        [data-theme="light"] .empire-panel { background-color: rgba(248, 250, 252, 0.9); border-color: #e2e8f0; }
+    </style>
+    <script src="../assets/empire-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/empire-lobby.js"></script>
+</head>
+<body class="empire-app bg-slate-900 text-slate-100 min-h-screen flex flex-col select-none antialiased" data-suite-current-app="empire">
+
+    <header class="empire-topchrome glass-header sticky top-0 z-40 border-b border-amber-200/80 px-3 md:px-4 py-2.5 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+            <a href="../" class="shrink-0 p-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition-colors" data-i18n-title="join_back_empire" title="Back to Empire">
+                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+            <div class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl ring-1 ring-amber-100 overflow-hidden bg-white">
+                <img src="../assets/favicon-empire.svg" alt="" class="w-full h-full" width="36" height="36"/>
+            </div>
+            <div class="min-w-0">
+                <div class="text-lg font-extrabold text-amber-700 tracking-tight truncate">Empire</div>
+                <div class="text-[11px] text-slate-500 font-medium hidden sm:block truncate" data-i18n="join_page_subtitle">Join online lobby</div>
+            </div>
+        </div>
+        <div class="flex gap-1.5 text-xs font-extrabold shrink-0" dir="ltr">
+            <button type="button" onclick="changeLanguage('en')" id="suite-lang-en" class="text-slate-500 hover:text-amber-600 transition-colors">EN</button>
+            <span class="text-slate-300">|</span>
+            <button type="button" onclick="changeLanguage('he')" id="suite-lang-he" class="text-slate-500 hover:text-amber-600 transition-colors">HE</button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-4">
+        <div class="empire-game-shell w-full max-w-sm bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 p-5 space-y-4">
+
+            <div id="join-form-view" class="space-y-4">
+                <div class="text-center space-y-1">
+                    <span class="text-4xl">📱</span>
+                    <h1 class="empire-heading text-xl font-black text-violet-400" data-i18n="join_title">Join the game</h1>
+                    <p class="empire-subtitle text-slate-400 text-sm" data-i18n="join_subtitle">Enter your name and secret celebrity</p>
+                </div>
+                <div class="empire-panel bg-slate-700/50 p-3 rounded-xl border border-slate-600 text-center">
+                    <span class="text-xs text-slate-400" data-i18n="join_room_label">Room</span>
+                    <div id="join-room-code" class="text-lg font-black text-violet-400 tracking-widest"></div>
+                </div>
+                <input type="text" id="join-player-name" autocomplete="name" maxlength="80"
+                       class="empire-input w-full p-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-start font-bold text-white focus:border-violet-500 focus:outline-none"
+                       data-i18n-ph="join_name_ph" placeholder="Your name">
+                <input type="text" id="join-celebrity" maxlength="200"
+                       class="empire-input w-full p-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-start font-bold text-white focus:border-violet-500 focus:outline-none"
+                       data-i18n-ph="join_celebrity_ph" placeholder="Your celebrity (secret)">
+                <button type="button" id="join-submit-btn" onclick="submitJoinForm()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition" data-i18n="join_submit">
+                    Submit ✓
+                </button>
+                <p id="join-error" class="hidden text-red-400 text-sm text-center"></p>
+            </div>
+
+            <div id="join-success-view" class="hidden text-center space-y-4">
+                <span class="text-5xl">✅</span>
+                <h2 class="empire-heading text-xl font-black text-emerald-400" data-i18n="join_success_title">You're in!</h2>
+                <p class="empire-body-text text-slate-300 text-sm leading-relaxed" data-i18n="join_success_body">You can close this tab. Play from the dealer's phone when the game starts.</p>
+            </div>
+
+            <div id="join-missing-room" class="hidden text-center space-y-3">
+                <span class="text-4xl">🔗</span>
+                <p class="empire-body-text text-slate-300 text-sm" data-i18n="join_missing_room">Open the link from the dealer to join this game.</p>
+                <a href="../" class="inline-block text-violet-400 font-bold text-sm hover:underline" data-i18n="join_back_empire">Back to Empire</a>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        var translations = {
+            he: {
+                join_page_subtitle: "הצטרפות ללובי",
+                join_back_empire: "חזרה ל-Empire",
+                join_title: "הצטרפו למשחק",
+                join_subtitle: "הזינו שם ודמות בסוד",
+                join_room_label: "חדר",
+                join_name_ph: "השם שלך",
+                join_celebrity_ph: "הדמות שלך (בסוד)",
+                join_submit: "שליחה ✓",
+                join_success_title: "נרשמתם!",
+                join_success_body: "אפשר לסגור את הדף. המשחק ימשיך מהטלפון של הדילר.",
+                join_missing_room: "פתחו את הקישור שקיבלתם מהדילר.",
+                join_error_room_not_found: "חדר לא נמצא או שפג תוקפו",
+                join_error_room_closed: "המשחק כבר התחיל — לא ניתן להצטרף",
+                join_error_room_full: "החדר מלא (20 שחקנים)",
+                join_error_name_taken: "השם כבר תפוס בחדר הזה",
+                join_error_invalid_name: "הזינו שם תקין",
+                join_error_invalid_celebrity: "הזינו דמות תקינה",
+                join_error_generic: "משהו השתבש — נסו שוב",
+                alert_supabase_missing_title: "חיבור לענן לא הוגדר",
+                alert_supabase_missing_desc: "הגדר EMPIRE_SUPABASE_URL ו-EMPIRE_SUPABASE_ANON_KEY (ראו docs/SUPABASE.md)"
+            },
+            en: {
+                join_page_subtitle: "Join online lobby",
+                join_back_empire: "Back to Empire",
+                join_title: "Join the game",
+                join_subtitle: "Enter your name and secret celebrity",
+                join_room_label: "Room",
+                join_name_ph: "Your name",
+                join_celebrity_ph: "Your celebrity (secret)",
+                join_submit: "Submit ✓",
+                join_success_title: "You're in!",
+                join_success_body: "You can close this tab. Play from the dealer's phone when the game starts.",
+                join_missing_room: "Open the link from the dealer to join this game.",
+                join_error_room_not_found: "Room not found or expired",
+                join_error_room_closed: "The game already started — can't join",
+                join_error_room_full: "Room is full (20 players)",
+                join_error_name_taken: "That name is already taken in this room",
+                join_error_invalid_name: "Enter a valid name",
+                join_error_invalid_celebrity: "Enter a valid celebrity",
+                join_error_generic: "Something went wrong — try again",
+                alert_supabase_missing_title: "Cloud not configured",
+                alert_supabase_missing_desc: "Set EMPIRE_SUPABASE_URL and EMPIRE_SUPABASE_ANON_KEY (see docs/SUPABASE.md)"
+            }
+        };
+
+        var currentLang = localStorage.getItem('empire_lang') || 'he';
+        var roomCode = '';
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key]) || translations.he[key] || key;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('empire_lang', lang);
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            var btnEn = document.getElementById('suite-lang-en');
+            var btnHe = document.getElementById('suite-lang-he');
+            if (btnEn && btnHe) {
+                btnEn.className = lang === 'en' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+                btnHe.className = lang === 'he' ? 'text-amber-600 font-bold' : 'text-slate-500 hover:text-amber-600 transition-colors';
+            }
+            document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerText = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+                var key = el.getAttribute('data-i18n-ph');
+                if (translations[lang][key]) el.placeholder = translations[lang][key];
+            });
+        }
+
+        function showJoinError(code) {
+            var el = document.getElementById('join-error');
+            var key = window.EmpireLobby ? EmpireLobby.errorMessageKey(code) : 'join_error_generic';
+            el.textContent = t(key);
+            el.classList.remove('hidden');
+        }
+
+        function hideJoinError() {
+            document.getElementById('join-error').classList.add('hidden');
+        }
+
+        function submitJoinForm() {
+            hideJoinError();
+            if (!window.EmpireLobby || !EmpireLobby.isConfigured()) {
+                showJoinError('SUPABASE_NOT_CONFIGURED');
+                return;
+            }
+            var name = document.getElementById('join-player-name').value.trim();
+            var celeb = document.getElementById('join-celebrity').value.trim();
+            if (!name || !celeb) {
+                showJoinError(!name ? 'INVALID_NAME' : 'INVALID_CELEBRITY');
+                return;
+            }
+            var btn = document.getElementById('join-submit-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+            EmpireLobby.submitEntry(roomCode, name, celeb).then(function () {
+                document.getElementById('join-form-view').classList.add('hidden');
+                document.getElementById('join-success-view').classList.remove('hidden');
+            }).catch(function (err) {
+                showJoinError(err.message || 'UNKNOWN_ERROR');
+                btn.disabled = false;
+                btn.classList.remove('opacity-60');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            changeLanguage(currentLang);
+            var params = new URLSearchParams(window.location.search);
+            roomCode = (params.get('r') || '').trim().toUpperCase();
+            if (!roomCode) {
+                document.getElementById('join-form-view').classList.add('hidden');
+                document.getElementById('join-missing-room').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('join-room-code').textContent = roomCode;
+            if (!window.EmpireLobby || !EmpireLobby.isConfigured()) {
+                showJoinError('SUPABASE_NOT_CONFIGURED');
+            }
+        });
+    </script>
+</body>
+</html>

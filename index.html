@@ -184,8 +184,48 @@
                 <p class="empire-subtitle text-slate-400 text-sm" data-i18n="step_count_subtitle">המשחק הטקטי שבו מנחשים פתקים וכובשים שחקנים</p>
             </div>
             <div class="space-y-3">
-                <button type="button" onclick="startNewGame()" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-base shadow-lg" data-i18n="btn_start_new_game">
-                    התחל משחק חדש
+                <button type="button" onclick="startNewGame()" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-base shadow-lg" data-i18n="btn_start_one_phone">
+                    טלפון אחד — העברה בין שחקנים
+                </button>
+                <button type="button" onclick="hostOnlineLobby()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition text-base shadow-lg" data-i18n="btn_host_online">
+                    לובי מקוון — כל שחקן מהטלפון שלו
+                </button>
+            </div>
+        </div>
+
+        <!-- שלב לובי מקוון (דילר) -->
+        <div id="step-lobby" class="hidden flex-1 flex flex-col justify-between overflow-hidden">
+            <div class="text-center shrink-0 mb-2 space-y-1">
+                <h2 class="empire-heading text-xl font-black text-violet-400" data-i18n="lobby_title">לובי מקוון</h2>
+                <p class="empire-subtitle text-slate-400 text-xs" data-i18n="lobby_subtitle">שתפו את הקישור; כל שחקן שולח שם ודמות מהטלפון שלו</p>
+            </div>
+            <div class="empire-panel bg-slate-700/50 p-3 rounded-xl border border-slate-600 space-y-3 shrink-0">
+                <div>
+                    <div class="text-xs text-slate-400 text-center" data-i18n="lobby_code_label">קוד חדר</div>
+                    <div id="lobby-code" class="text-2xl font-black text-violet-400 tracking-widest text-center"></div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400 text-center mb-1" data-i18n="lobby_link_label">קישור להצטרפות</div>
+                    <div id="lobby-link" class="text-xs break-all text-slate-300 text-center px-1"></div>
+                </div>
+                <button type="button" onclick="copyLobbyLink()" class="w-full py-2 bg-slate-600 hover:bg-slate-500 text-white font-bold rounded-xl text-sm transition" data-i18n="lobby_copy_link">
+                    העתק קישור
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto my-2 min-h-0">
+                <p class="text-xs text-slate-400 mb-2 text-center" data-i18n="lobby_players_hint">כשכולם סיימו, לחצו רענון לעדכון הרשימה</p>
+                <div id="lobby-players-list" class="space-y-1"></div>
+                <p id="lobby-player-count" class="text-center text-sm text-slate-400 mt-2"></p>
+            </div>
+            <div class="space-y-2 shrink-0">
+                <button type="button" onclick="refreshLobbyPlayers()" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-sm transition" data-i18n="lobby_refresh">
+                    רענון רשימת שחקנים
+                </button>
+                <button type="button" onclick="startOnlineGame()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition text-base" data-i18n="lobby_start_game">
+                    התחל משחק במכשיר הזה
+                </button>
+                <button type="button" onclick="cancelLobby()" class="empire-new-btn w-full py-2 text-slate-400 text-sm border border-slate-600 rounded-xl" data-i18n="lobby_cancel">
+                    ביטול
                 </button>
             </div>
         </div>
@@ -320,6 +360,9 @@
         </div>
     </div>
 
+    <script src="assets/empire-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/empire-lobby.js"></script>
     <script src="/assets/simpluri-menu.js"></script>
     <script>
         // ================= MULTI-LANGUAGE (i18n) =================
@@ -333,7 +376,26 @@
                 menu_theme: "מצב / Theme",
                 step_count_title: "משחק הפתקים: כיבוש מוחות",
                 step_count_subtitle: "המשחק הטקטי שבו מנחשים פתקים וכובשים שחקנים",
-                btn_start_new_game: "התחל משחק חדש",
+                btn_start_one_phone: "טלפון אחד — העברה בין שחקנים",
+                btn_host_online: "לובי מקוון — כל שחקן מהטלפון שלו",
+                lobby_title: "לובי מקוון",
+                lobby_subtitle: "שתפו את הקישור; כל שחקן שולח שם ודמות מהטלפון שלו",
+                lobby_code_label: "קוד חדר",
+                lobby_link_label: "קישור להצטרפות",
+                lobby_copy_link: "העתק קישור",
+                lobby_players_hint: "כשכולם סיימו, לחצו רענון לעדכון הרשימה",
+                lobby_refresh: "רענון רשימת שחקנים",
+                lobby_start_game: "התחל משחק במכשיר הזה",
+                lobby_cancel: "ביטול",
+                lobby_players_count: "{count} שחקנים",
+                lobby_players_empty: "עדיין אין שחקנים — שתפו את הקישור",
+                lobby_link_copied: "הקישור הועתק!",
+                lobby_error_title: "שגיאה",
+                lobby_error_create: "לא ניתן ליצור חדר",
+                lobby_error_generic: "משהו השתבש — נסו שוב",
+                lobby_error_already_started: "המשחק כבר התחיל",
+                alert_supabase_missing_title: "חיבור לענן לא הוגדר",
+                alert_supabase_missing_desc: "הגדר EMPIRE_SUPABASE_URL ו-EMPIRE_SUPABASE_ANON_KEY (ראו docs/SUPABASE.md)",
                 step_names_title: "מי משחק?",
                 step_names_subtitle: "הוסיפו שחקנים ומלאו את השמות (2–20)",
                 btn_add_player: "+ הוסף שחקן",
@@ -395,7 +457,26 @@
                 menu_theme: "Theme / מצב",
                 step_count_title: "Empire: Mind Conquest",
                 step_count_subtitle: "The tactical game of guessing slips and capturing players",
-                btn_start_new_game: "Start new game",
+                btn_start_one_phone: "One phone — pass between players",
+                btn_host_online: "Online lobby — each player on their phone",
+                lobby_title: "Online lobby",
+                lobby_subtitle: "Share the link; each player submits name and celebrity from their phone",
+                lobby_code_label: "Room code",
+                lobby_link_label: "Join link",
+                lobby_copy_link: "Copy link",
+                lobby_players_hint: "When everyone is done, tap refresh to update the list",
+                lobby_refresh: "Refresh player list",
+                lobby_start_game: "Start game on this device",
+                lobby_cancel: "Cancel",
+                lobby_players_count: "{count} players",
+                lobby_players_empty: "No players yet — share the link",
+                lobby_link_copied: "Link copied!",
+                lobby_error_title: "Error",
+                lobby_error_create: "Could not create room",
+                lobby_error_generic: "Something went wrong — try again",
+                lobby_error_already_started: "Game already started",
+                alert_supabase_missing_title: "Cloud not configured",
+                alert_supabase_missing_desc: "Set EMPIRE_SUPABASE_URL and EMPIRE_SUPABASE_ANON_KEY (see docs/SUPABASE.md)",
                 step_names_title: "Who's playing?",
                 step_names_subtitle: "Add players and enter names (2–20)",
                 btn_add_player: "+ Add player",
@@ -603,6 +684,10 @@
         let burnFlowStep = 1; 
         let selectedAuthorName = "";
 
+        let lobbyDealerToken = null;
+        let lobbyRoomCode = null;
+        let lobbyPlayers = [];
+
         // זיכרון הבעלויות וההיסטוריה (לפתרון באג שרשראות הכיבוש ומניעת מעגלים)
         let parentMap = {};
         let conquestHistory = [];
@@ -701,6 +786,98 @@
             showStep('step-names');
         }
 
+        function lobbyErrorMessage(err) {
+            var code = (err && err.message) ? err.message : 'UNKNOWN_ERROR';
+            var key = window.EmpireLobby ? EmpireLobby.errorMessageKey(code) : 'lobby_error_generic';
+            return t(key);
+        }
+
+        function renderLobbyShare() {
+            document.getElementById('lobby-code').textContent = lobbyRoomCode || '';
+            document.getElementById('lobby-link').textContent = EmpireLobby.buildJoinUrl(lobbyRoomCode);
+        }
+
+        function renderLobbyPlayersList(players) {
+            var listEl = document.getElementById('lobby-players-list');
+            var countEl = document.getElementById('lobby-player-count');
+            if (!players.length) {
+                listEl.innerHTML = '<p class="text-center text-slate-500 text-sm">' + escapeAttr(t('lobby_players_empty')) + '</p>';
+            } else {
+                listEl.innerHTML = players.map(function (p, i) {
+                    var cObj = colorForIndex(i);
+                    return '<div class="empire-name-row flex items-center gap-2 bg-slate-700/40 p-2 rounded-xl border border-slate-600">' +
+                        '<span class="w-3 h-3 rounded-full shrink-0 ' + cObj.dot + '"></span>' +
+                        '<span class="text-sm font-semibold text-white truncate">' + escapeAttr(p.player_name) + '</span></div>';
+                }).join('');
+            }
+            countEl.textContent = t('lobby_players_count', { count: players.length });
+        }
+
+        async function hostOnlineLobby() {
+            if (!window.EmpireLobby || !EmpireLobby.isConfigured()) {
+                return showCustomAlert(t('alert_supabase_missing_title'), t('alert_supabase_missing_desc'), '⚠️');
+            }
+            try {
+                var result = await EmpireLobby.createRoom();
+                lobbyDealerToken = result.dealer_token;
+                lobbyRoomCode = result.code;
+                localStorage.setItem('empire_dealer_token', lobbyDealerToken);
+                localStorage.setItem('empire_room_code', lobbyRoomCode);
+                lobbyPlayers = [];
+                renderLobbyShare();
+                renderLobbyPlayersList([]);
+                showStep('step-lobby');
+            } catch (err) {
+                showCustomAlert(t('lobby_error_title'), lobbyErrorMessage(err) || t('lobby_error_create'), '⚠️');
+            }
+        }
+
+        async function refreshLobbyPlayers() {
+            if (!lobbyDealerToken) return;
+            try {
+                var data = await EmpireLobby.fetchLobby(lobbyDealerToken);
+                lobbyPlayers = data.players || [];
+                renderLobbyPlayersList(lobbyPlayers);
+            } catch (err) {
+                showCustomAlert(t('lobby_error_title'), lobbyErrorMessage(err), '⚠️');
+            }
+        }
+
+        async function startOnlineGame() {
+            if (!lobbyDealerToken) return;
+            try {
+                var data = await EmpireLobby.startGame(lobbyDealerToken);
+                localStorage.removeItem('empire_dealer_token');
+                localStorage.removeItem('empire_room_code');
+                initDealerModeFromSubmissions(data.submissions || []);
+            } catch (err) {
+                showCustomAlert(t('lobby_error_title'), lobbyErrorMessage(err), '⚠️');
+            }
+        }
+
+        function copyLobbyLink() {
+            if (!lobbyRoomCode || !window.EmpireLobby) return;
+            var link = EmpireLobby.buildJoinUrl(lobbyRoomCode);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(function () {
+                    showCustomAlert(t('lobby_link_copied'), link, '📋');
+                }).catch(function () {
+                    showCustomAlert(t('lobby_link_label'), link, '🔗');
+                });
+            } else {
+                showCustomAlert(t('lobby_link_label'), link, '🔗');
+            }
+        }
+
+        function cancelLobby() {
+            lobbyDealerToken = null;
+            lobbyRoomCode = null;
+            lobbyPlayers = [];
+            localStorage.removeItem('empire_dealer_token');
+            localStorage.removeItem('empire_room_code');
+            showStep('step-count');
+        }
+
         function addPlayerField() {
             var count = getNameFieldCount();
             if (count >= MAX_PLAYERS) {
@@ -766,15 +943,29 @@
             }
         }
 
+        function initDealerModeFromSubmissions(submissions) {
+            if (!submissions.length) return;
+            players = submissions.map(function (s, i) {
+                return { name: s.player_name.trim(), colorIndex: i % PLAYER_COLORS.length };
+            });
+            characters = submissions.map(function (s) { return s.celebrity.trim(); });
+            initDealerMode();
+        }
+
         function initDealerMode() {
-            shuffledList = characters.map((c, index) => ({
-                name: c,
-                originalPlayerName: players[index].name, 
-                isBurnt: false,
-                author: "", 
-                guesser: "", 
-                currentOwner: "" 
-            })).sort(() => Math.random() - 0.5);
+            if (!characters.length && players.length) {
+                characters = players.map(function () { return ''; });
+            }
+            shuffledList = characters.map(function (c, index) {
+                return {
+                    name: c,
+                    originalPlayerName: players[index].name,
+                    isBurnt: false,
+                    author: "",
+                    guesser: "",
+                    currentOwner: ""
+                };
+            }).sort(function () { return Math.random() - 0.5; });
             
             // איפוס היסטוריית הכיבושים למשחק חדש
             conquestHistory = [];
@@ -1044,6 +1235,7 @@
 
         function showStep(stepId) {
             document.getElementById('step-count').classList.add('hidden');
+            document.getElementById('step-lobby').classList.add('hidden');
             document.getElementById('step-names').classList.add('hidden');
             document.getElementById('step-entry').classList.add('hidden');
             document.getElementById('step-dealer').classList.add('hidden');
