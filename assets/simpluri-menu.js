@@ -12,7 +12,7 @@
     function fileSuiteLayout() {
         if (location.protocol !== 'file:') return null;
         var p = decodeURIComponent(location.pathname.replace(/\\/g, '/'));
-        var repoNeedles = ['/repos/simpluri/', '/repos/tripify/', '/repos/gif-off/', '/repos/empire/'];
+        var repoNeedles = ['/repos/simpluri/', '/repos/tripify/', '/repos/gif-off/', '/repos/empire/', '/repos/formulator/'];
         for (var r = 0; r < repoNeedles.length; r++) {
             var idx = p.indexOf(repoNeedles[r]);
             if (idx !== -1) {
@@ -43,11 +43,13 @@
                 packinglist: o + '/apps/triplist/triplist.html',
                 gifoff: o + '/apps/gif-off/gif-off.html',
                 empire: o + '/apps/empire/empire.html',
+                formulator: o + '/apps/formulator/formulator.html',
                 tripifyApp: o + '/tripify/',
                 tripmapApp: o + '/tripify/tripmap/',
                 packinglistApp: o + '/tripify/triplist/',
                 gifoffApp: o + '/gif-off/',
-                empireApp: o + '/empire/'
+                empireApp: o + '/empire/',
+                formulatorApp: o + '/formulator/'
             };
         }
         var layout = fileSuiteLayout();
@@ -60,11 +62,13 @@
                     packinglist: new URL('simpluri/apps/triplist/triplist.html', layout.base).href,
                     gifoff: new URL('simpluri/apps/gif-off/gif-off.html', layout.base).href,
                     empire: new URL('simpluri/apps/empire/empire.html', layout.base).href,
+                    formulator: new URL('simpluri/apps/formulator/formulator.html', layout.base).href,
                     tripifyApp: new URL('tripify/index.html', layout.base).href,
                     tripmapApp: new URL('tripify/tripmap/index.html', layout.base).href,
                     packinglistApp: new URL('tripify/triplist/index.html', layout.base).href,
                     gifoffApp: new URL('gif-off/index.html', layout.base).href,
-                    empireApp: new URL('empire/index.html', layout.base).href
+                    empireApp: new URL('empire/index.html', layout.base).href,
+                    formulatorApp: new URL('formulator/index.html', layout.base).href
                 };
             }
             return {
@@ -74,11 +78,13 @@
                 packinglist: new URL('apps/triplist/triplist.html', layout.base).href,
                 gifoff: new URL('apps/gif-off/gif-off.html', layout.base).href,
                 empire: new URL('apps/empire/empire.html', layout.base).href,
+                formulator: new URL('apps/formulator/formulator.html', layout.base).href,
                 tripifyApp: new URL('tripify/index.html', layout.base).href,
                 tripmapApp: new URL('tripify/tripmap/index.html', layout.base).href,
                 packinglistApp: new URL('tripify/triplist/index.html', layout.base).href,
                 gifoffApp: new URL('gif-off/index.html', layout.base).href,
-                empireApp: new URL('empire/index.html', layout.base).href
+                empireApp: new URL('empire/index.html', layout.base).href,
+                formulatorApp: new URL('formulator/index.html', layout.base).href
             };
         }
         return {
@@ -88,16 +94,18 @@
             packinglist: 'https://simpluri.com/apps/triplist/triplist.html',
             gifoff: 'https://simpluri.com/apps/gif-off/gif-off.html',
             empire: 'https://simpluri.com/apps/empire/empire.html',
+            formulator: 'https://simpluri.com/apps/formulator/formulator.html',
             tripifyApp: 'https://tripify.simpluri.com/',
             tripmapApp: 'https://tripify.simpluri.com/tripmap/',
             packinglistApp: 'https://tripify.simpluri.com/triplist/',
             gifoffApp: 'https://gif-off.simpluri.com/',
-            empireApp: 'https://empire.simpluri.com/'
+            empireApp: 'https://empire.simpluri.com/',
+            formulatorApp: 'https://formulator.simpluri.com/'
         };
     }
 
     var TRIPIFY_SUITE_NAV = ['tripify', 'tripmap', 'packinglist'];
-    var FUN_GAMES_NAV = ['gifoff', 'empire'];
+    var FUN_GAMES_NAV = ['gifoff', 'empire', 'formulator'];
     var TRIPIFY_SUITE_APPS = TRIPIFY_SUITE_NAV.slice();
 
     function createMenuGroupHeader(text) {
@@ -216,6 +224,8 @@
         if (p.indexOf('/gif-off/') !== -1 || /\/gif-off(?:\/index\.html)?$/.test(p)) return 'gifoff';
         if (p.indexOf('/apps/empire/') !== -1) return 'empire';
         if (p.indexOf('/empire/') !== -1 || location.hostname === 'empire.simpluri.com') return 'empire';
+        if (p.indexOf('/apps/formulator/') !== -1) return 'formulator';
+        if (p.indexOf('/formulator/') !== -1 || location.hostname === 'formulator.simpluri.com') return 'formulator';
         if (p.indexOf('/tripify/') !== -1) return 'tripify';
         if (location.hostname === 'tripify.simpluri.com') return 'tripify';
         return 'portal';
