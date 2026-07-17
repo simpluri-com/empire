@@ -107,6 +107,83 @@
     var TRIPIFY_SUITE_NAV = ['tripify', 'tripmap', 'packinglist'];
     var FUN_GAMES_NAV = ['gifoff', 'empire', 'formulator'];
     var TRIPIFY_SUITE_APPS = TRIPIFY_SUITE_NAV.slice();
+    var SUITE_BACK_NAV_TOKEN = '__suite_back__';
+
+    function isTripifySuiteHost() {
+        if (location.hostname === 'tripify.simpluri.com') return true;
+        if (isLocalhost()) {
+            var p = decodeURIComponent(location.pathname).replace(/\\/g, '/');
+            return p.indexOf('/tripify/') === 0 || p === '/tripify' || p === '/tripify/';
+        }
+        return false;
+    }
+
+    function findHeaderBackLink() {
+        var headers = document.querySelectorAll('header');
+        for (var i = 0; i < headers.length; i++) {
+            var links = headers[i].querySelectorAll('a[data-suite-href="portal"]');
+            for (var j = 0; j < links.length; j++) {
+                var link = links[j];
+                if (link.closest('[data-suite-menu-dropdown]')) continue;
+                if (link.getAttribute('data-suite-nav') === 'portal') continue;
+                return link;
+            }
+        }
+        return null;
+    }
+
+    function suiteBackFallbackUrl() {
+        var u = suiteUrls();
+        var app = detectCurrentSuiteApp();
+        if (app === 'tripmap' || app === 'packinglist') {
+            var url = u.tripifyApp;
+            if (global.Tripify && typeof global.Tripify.getActiveTripId === 'function') {
+                var tripId = Tripify.getActiveTripId();
+                if (tripId) {
+                    try {
+                        var parsed = new URL(url, location.href);
+                        parsed.searchParams.set('trip', tripId);
+                        if (typeof Tripify.getStoredShareToken === 'function') {
+                            var share = Tripify.getStoredShareToken(tripId);
+                            if (share) parsed.searchParams.set('share', share);
+                        }
+                        return parsed.toString();
+                    } catch (e) { /* fall through */ }
+                }
+            }
+            return url;
+        }
+        return u.portal;
+    }
+
+    function performSuiteBackNavigation() {
+        if (window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+        window.location.href = suiteBackFallbackUrl();
+    }
+
+    function configureTripifySuiteBack() {
+        if (!isTripifySuiteHost()) return;
+        var link = findHeaderBackLink();
+        if (!link) return;
+        link.setAttribute('data-suite-header-back', '1');
+        link.setAttribute('data-portal-back', '');
+        link.title = 'Back';
+        link.setAttribute('aria-label', 'Back');
+        if (link.getAttribute('data-suite-back-bound') === '1') return;
+        link.setAttribute('data-suite-back-bound', '1');
+        link.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            e.preventDefault();
+            performSuiteBackNavigation();
+        });
+    }
+
+    function isSuiteBackNavigationToken(href) {
+        return href === SUITE_BACK_NAV_TOKEN;
+    }
 
     function createMenuGroupHeader(text) {
         var h = document.createElement('div');
@@ -280,9 +357,24 @@
                 }
                 return;
             }
+            if (e.target.closest('[data-suite-nav][href]')) {
+                closeAllSuiteMenus();
+                return;
+            }
             if (!e.target.closest('[data-suite-menu-dropdown]')) {
                 closeAllSuiteMenus();
             }
+        });
+
+        /* Mobile back / bfcache: restored pages keep open dropdown without a click to close */
+        window.addEventListener('pageshow', function () {
+            closeAllSuiteMenus();
+        });
+        window.addEventListener('popstate', function () {
+            closeAllSuiteMenus();
+        });
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') closeAllSuiteMenus();
         });
     }
 
@@ -292,12 +384,18 @@
         applySuiteNavVisibility: applySuiteNavVisibility,
         organizeSuiteMenus: organizeSuiteMenus,
         detectCurrentSuiteApp: detectCurrentSuiteApp,
-        closeAllSuiteMenus: closeAllSuiteMenus
+        closeAllSuiteMenus: closeAllSuiteMenus,
+        isTripifySuiteHost: isTripifySuiteHost,
+        performSuiteBackNavigation: performSuiteBackNavigation,
+        suiteBackNavigationToken: SUITE_BACK_NAV_TOKEN,
+        isSuiteBackNavigationToken: isSuiteBackNavigationToken
     };
 
     function init() {
+        closeAllSuiteMenus();
         organizeSuiteMenus();
         applyResolvedLinks();
+        configureTripifySuiteBack();
         bindSuiteMenus();
     }
 
