@@ -41,12 +41,14 @@
                 myTrips: o + '/my-trips.html',
                 tripmap: o + '/apps/tripmap/tripmap.html',
                 packinglist: o + '/apps/triplist/triplist.html',
+                tripnotes: o + '/apps/tripnotes/tripnotes.html',
                 gifoff: o + '/apps/gif-off/gif-off.html',
                 empire: o + '/apps/empire/empire.html',
                 formulator: o + '/apps/formulator/formulator.html',
                 tripifyApp: o + '/tripify/',
                 tripmapApp: o + '/tripify/tripmap/',
                 packinglistApp: o + '/tripify/triplist/',
+                tripnotesApp: o + '/tripify/tripnotes/',
                 gifoffApp: o + '/gif-off/',
                 empireApp: o + '/empire/',
                 formulatorApp: o + '/formulator/'
@@ -60,12 +62,14 @@
                     myTrips: new URL('simpluri/my-trips.html', layout.base).href,
                     tripmap: new URL('simpluri/apps/tripmap/tripmap.html', layout.base).href,
                     packinglist: new URL('simpluri/apps/triplist/triplist.html', layout.base).href,
+                    tripnotes: new URL('simpluri/apps/tripnotes/tripnotes.html', layout.base).href,
                     gifoff: new URL('simpluri/apps/gif-off/gif-off.html', layout.base).href,
                     empire: new URL('simpluri/apps/empire/empire.html', layout.base).href,
                     formulator: new URL('simpluri/apps/formulator/formulator.html', layout.base).href,
                     tripifyApp: new URL('tripify/index.html', layout.base).href,
                     tripmapApp: new URL('tripify/tripmap/index.html', layout.base).href,
                     packinglistApp: new URL('tripify/triplist/index.html', layout.base).href,
+                    tripnotesApp: new URL('tripify/tripnotes/index.html', layout.base).href,
                     gifoffApp: new URL('gif-off/index.html', layout.base).href,
                     empireApp: new URL('empire/index.html', layout.base).href,
                     formulatorApp: new URL('formulator/index.html', layout.base).href
@@ -76,12 +80,14 @@
                 myTrips: new URL('my-trips.html', layout.base).href,
                 tripmap: new URL('apps/tripmap/tripmap.html', layout.base).href,
                 packinglist: new URL('apps/triplist/triplist.html', layout.base).href,
+                tripnotes: new URL('apps/tripnotes/tripnotes.html', layout.base).href,
                 gifoff: new URL('apps/gif-off/gif-off.html', layout.base).href,
                 empire: new URL('apps/empire/empire.html', layout.base).href,
                 formulator: new URL('apps/formulator/formulator.html', layout.base).href,
                 tripifyApp: new URL('tripify/index.html', layout.base).href,
                 tripmapApp: new URL('tripify/tripmap/index.html', layout.base).href,
                 packinglistApp: new URL('tripify/triplist/index.html', layout.base).href,
+                tripnotesApp: new URL('tripify/tripnotes/index.html', layout.base).href,
                 gifoffApp: new URL('gif-off/index.html', layout.base).href,
                 empireApp: new URL('empire/index.html', layout.base).href,
                 formulatorApp: new URL('formulator/index.html', layout.base).href
@@ -92,19 +98,21 @@
             myTrips: 'https://simpluri.com/my-trips.html',
             tripmap: 'https://simpluri.com/apps/tripmap/tripmap.html',
             packinglist: 'https://simpluri.com/apps/triplist/triplist.html',
+            tripnotes: 'https://simpluri.com/apps/tripnotes/tripnotes.html',
             gifoff: 'https://simpluri.com/apps/gif-off/gif-off.html',
             empire: 'https://simpluri.com/apps/empire/empire.html',
             formulator: 'https://simpluri.com/apps/formulator/formulator.html',
             tripifyApp: 'https://tripify.simpluri.com/',
             tripmapApp: 'https://tripify.simpluri.com/tripmap/',
             packinglistApp: 'https://tripify.simpluri.com/triplist/',
+            tripnotesApp: 'https://tripify.simpluri.com/tripnotes/',
             gifoffApp: 'https://gif-off.simpluri.com/',
             empireApp: 'https://empire.simpluri.com/',
             formulatorApp: 'https://formulator.simpluri.com/'
         };
     }
 
-    var TRIPIFY_SUITE_NAV = ['tripify', 'tripmap', 'packinglist'];
+    var TRIPIFY_SUITE_NAV = ['tripify', 'tripmap', 'packinglist', 'tripnotes'];
     var FUN_GAMES_NAV = ['gifoff', 'empire', 'formulator'];
     var TRIPIFY_SUITE_APPS = TRIPIFY_SUITE_NAV.slice();
     var SUITE_BACK_NAV_TOKEN = '__suite_back__';
@@ -135,7 +143,7 @@
     function suiteBackFallbackUrl() {
         var u = suiteUrls();
         var app = detectCurrentSuiteApp();
-        if (app === 'tripmap' || app === 'packinglist') {
+        if (app === 'tripmap' || app === 'packinglist' || app === 'tripnotes') {
             var url = u.tripifyApp;
             if (global.Tripify && typeof global.Tripify.getActiveTripId === 'function') {
                 var tripId = Tripify.getActiveTripId();
@@ -297,6 +305,9 @@
         if (p.indexOf('/apps/triplist/') !== -1) return 'packinglist';
         if (p.indexOf('/tripify/triplist/') !== -1) return 'packinglist';
         if (location.hostname === 'tripify.simpluri.com' && (p.indexOf('/triplist/') !== -1 || p === '/triplist')) return 'packinglist';
+        if (p.indexOf('/apps/tripnotes/') !== -1) return 'tripnotes';
+        if (p.indexOf('/tripify/tripnotes/') !== -1) return 'tripnotes';
+        if (location.hostname === 'tripify.simpluri.com' && (p.indexOf('/tripnotes/') !== -1 || p === '/tripnotes')) return 'tripnotes';
         if (p.indexOf('/apps/gif-off/') !== -1) return 'gifoff';
         if (p.indexOf('/gif-off/') !== -1 || /\/gif-off(?:\/index\.html)?$/.test(p)) return 'gifoff';
         if (p.indexOf('/apps/empire/') !== -1) return 'empire';
