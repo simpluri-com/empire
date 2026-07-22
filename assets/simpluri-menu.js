@@ -1,7 +1,7 @@
 /**
  * Resolves cross-site links and suite dropdown (kebab) toggles. No fixed top bar.
  */
-(function () {
+(function (global) {
     function isLocalhost() {
         if (location.protocol === 'file:') return false;
         var h = location.hostname;
@@ -116,6 +116,12 @@
     var FUN_GAMES_NAV = ['gifoff', 'empire', 'formulator'];
     var TRIPIFY_SUITE_APPS = TRIPIFY_SUITE_NAV.slice();
     var SUITE_BACK_NAV_TOKEN = '__suite_back__';
+    var SUITE_FORWARD_NAV_TOKEN = '__suite_forward__';
+    var SUITE_HISTORY_KEY = 'tripify.suite_history';
+    var SUITE_HISTORY_DELTA_KEY = 'tripify.suite_history_delta';
+    var FORWARD_ARROW_SVG =
+        '<svg class="w-5 h-5 tripify-forward-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>';
 
     function isTripifySuiteHost() {
         if (location.hostname === 'tripify.simpluri.com') return true;
@@ -140,57 +146,247 @@
         return null;
     }
 
-    function suiteBackFallbackUrl() {
-        var u = suiteUrls();
-        var app = detectCurrentSuiteApp();
-        if (app === 'tripmap' || app === 'packinglist' || app === 'tripnotes') {
-            var url = u.tripifyApp;
-            if (global.Tripify && typeof global.Tripify.getActiveTripId === 'function') {
-                var tripId = Tripify.getActiveTripId();
-                if (tripId) {
-                    try {
-                        var parsed = new URL(url, location.href);
-                        parsed.searchParams.set('trip', tripId);
-                        if (typeof Tripify.getStoredShareToken === 'function') {
-                            var share = Tripify.getStoredShareToken(tripId);
-                            if (share) parsed.searchParams.set('share', share);
-                        }
-                        return parsed.toString();
-                    } catch (e) { /* fall through */ }
+    function currentSuiteHistoryEntry() {
+        var p = decodeURIComponent(location.pathname || '/').replace(/\\/g, '/');
+        if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+        return p || '/';
+    }
+
+    function getSuiteHistory() {
+        try {
+            var raw = sessionStorage.getItem(SUITE_HISTORY_KEY);
+            if (!raw) return { entries: [], index: -1 };
+            var parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.entries)) return { entries: [], index: -1 };
+            return {
+                entries: parsed.entries,
+                index: typeof parsed.index === 'number' ? parsed.index : -1
+            };
+        } catch (e) {
+            return { entries: [], index: -1 };
+        }
+    }
+
+    function setSuiteHistory(nav) {
+        try {
+            sessionStorage.setItem(SUITE_HISTORY_KEY, JSON.stringify({
+                entries: nav.entries || [],
+                index: typeof nav.index === 'number' ? nav.index : -1
+            }));
+        } catch (e) { /* private mode */ }
+    }
+
+    function getSuiteHistoryDelta() {
+        try {
+            var n = parseInt(sessionStorage.getItem(SUITE_HISTORY_DELTA_KEY) || '0', 10);
+            return n === 1 || n === -1 ? n : 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function setSuiteHistoryDelta(delta) {
+        try {
+            if (delta === 1 || delta === -1) sessionStorage.setItem(SUITE_HISTORY_DELTA_KEY, String(delta));
+            else sessionStorage.removeItem(SUITE_HISTORY_DELTA_KEY);
+        } catch (e) { /* */ }
+    }
+
+    function getNavigationType() {
+        try {
+            var entries = performance.getEntriesByType('navigation');
+            if (entries && entries[0] && entries[0].type) return entries[0].type;
+        } catch (e) { /* */ }
+        return 'navigate';
+    }
+
+    function canSuiteGoBack() {
+        var nav = getSuiteHistory();
+        return nav.index > 0;
+    }
+
+    function canSuiteGoForward() {
+        var nav = getSuiteHistory();
+        return nav.index >= 0 && nav.index < nav.entries.length - 1;
+    }
+
+    function updateSuiteHistoryButtons() {
+        if (!isTripifySuiteHost()) return;
+        var back = document.querySelector('[data-suite-header-back]');
+        var forward = document.querySelector('[data-suite-header-forward]');
+        var showBack = canSuiteGoBack();
+        var showForward = canSuiteGoForward();
+        if (back) {
+            back.hidden = !showBack;
+            back.setAttribute('aria-hidden', showBack ? 'false' : 'true');
+            if (showBack) back.removeAttribute('tabindex');
+            else back.setAttribute('tabindex', '-1');
+        }
+        if (forward) {
+            forward.hidden = !showForward;
+            forward.setAttribute('aria-hidden', showForward ? 'false' : 'true');
+            if (showForward) forward.removeAttribute('tabindex');
+            else forward.setAttribute('tabindex', '-1');
+        }
+    }
+
+    function syncSuiteHistory(opts) {
+        if (!isTripifySuiteHost()) return;
+        opts = opts || {};
+        var nav = getSuiteHistory();
+        var entry = currentSuiteHistoryEntry();
+        var delta = getSuiteHistoryDelta();
+        var navType = opts.forceBackForward ? 'back_forward' : getNavigationType();
+
+        if (delta === -1 || delta === 1) {
+            var nextIndex = nav.index + delta;
+            if (nextIndex >= 0 && nextIndex < nav.entries.length && nav.entries[nextIndex] === entry) {
+                nav.index = nextIndex;
+            } else {
+                var found = -1;
+                for (var i = 0; i < nav.entries.length; i++) {
+                    if (nav.entries[i] === entry) found = i;
+                }
+                if (found >= 0) nav.index = found;
+                else {
+                    nav.entries = nav.entries.slice(0, Math.max(0, nav.index + 1));
+                    nav.entries.push(entry);
+                    nav.index = nav.entries.length - 1;
                 }
             }
-            return url;
+            setSuiteHistoryDelta(0);
+        } else if (navType === 'back_forward') {
+            if (nav.index > 0 && nav.entries[nav.index - 1] === entry) {
+                nav.index -= 1;
+            } else if (nav.index >= 0 && nav.index < nav.entries.length - 1 && nav.entries[nav.index + 1] === entry) {
+                nav.index += 1;
+            } else {
+                var match = -1;
+                for (var j = 0; j < nav.entries.length; j++) {
+                    if (nav.entries[j] === entry) match = j;
+                }
+                if (match >= 0) nav.index = match;
+                else {
+                    nav.entries.push(entry);
+                    nav.index = nav.entries.length - 1;
+                }
+            }
+        } else if (navType === 'reload') {
+            if (nav.index < 0 || nav.entries[nav.index] !== entry) {
+                if (nav.entries.length === 0) {
+                    nav.entries = [entry];
+                    nav.index = 0;
+                } else if (nav.entries[nav.index] !== entry) {
+                    nav.entries[Math.max(0, nav.index)] = entry;
+                    if (nav.index < 0) nav.index = 0;
+                }
+            }
+        } else {
+            if (nav.index >= 0 && nav.entries[nav.index] === entry) {
+                /* already current */
+            } else {
+                nav.entries = nav.entries.slice(0, Math.max(0, nav.index + 1));
+                nav.entries.push(entry);
+                nav.index = nav.entries.length - 1;
+            }
         }
-        return u.portal;
+
+        setSuiteHistory(nav);
+        updateSuiteHistoryButtons();
     }
 
     function performSuiteBackNavigation() {
-        if (window.history.length > 1) {
-            window.history.back();
-            return;
-        }
-        window.location.href = suiteBackFallbackUrl();
+        if (!canSuiteGoBack()) return;
+        setSuiteHistoryDelta(-1);
+        window.history.back();
     }
 
-    function configureTripifySuiteBack() {
+    function performSuiteForwardNavigation() {
+        if (!canSuiteGoForward()) return;
+        setSuiteHistoryDelta(1);
+        window.history.forward();
+    }
+
+    function ensureSuiteForwardButton(backLink) {
+        var existing = backLink.parentNode
+            ? backLink.parentNode.querySelector('[data-suite-header-forward]')
+            : null;
+        if (existing) return existing;
+        var forward = document.createElement('a');
+        forward.href = '#';
+        forward.setAttribute('data-suite-header-forward', '1');
+        forward.title = 'Forward';
+        forward.setAttribute('aria-label', 'Forward');
+        forward.className = backLink.className;
+        forward.innerHTML = FORWARD_ARROW_SVG;
+        forward.hidden = true;
+        forward.setAttribute('aria-hidden', 'true');
+        forward.setAttribute('tabindex', '-1');
+        if (backLink.parentNode) {
+            if (backLink.nextSibling) backLink.parentNode.insertBefore(forward, backLink.nextSibling);
+            else backLink.parentNode.appendChild(forward);
+        }
+        return forward;
+    }
+
+    function configureTripifySuiteHistory() {
         if (!isTripifySuiteHost()) return;
-        var link = findHeaderBackLink();
-        if (!link) return;
-        link.setAttribute('data-suite-header-back', '1');
-        link.setAttribute('data-portal-back', '');
-        link.title = 'Back';
-        link.setAttribute('aria-label', 'Back');
-        if (link.getAttribute('data-suite-back-bound') === '1') return;
-        link.setAttribute('data-suite-back-bound', '1');
-        link.addEventListener('click', function (e) {
-            if (e.defaultPrevented) return;
-            e.preventDefault();
-            performSuiteBackNavigation();
-        });
+        var back = findHeaderBackLink();
+        if (!back) return;
+
+        back.setAttribute('data-suite-header-back', '1');
+        back.setAttribute('data-portal-back', '');
+        back.title = 'Back';
+        back.setAttribute('aria-label', 'Back');
+        back.hidden = true;
+        back.setAttribute('aria-hidden', 'true');
+        back.setAttribute('tabindex', '-1');
+
+        var forward = ensureSuiteForwardButton(back);
+
+        if (back.getAttribute('data-suite-back-bound') !== '1') {
+            back.setAttribute('data-suite-back-bound', '1');
+            back.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                e.preventDefault();
+                if (!canSuiteGoBack()) return;
+                performSuiteBackNavigation();
+            });
+        }
+
+        if (forward.getAttribute('data-suite-forward-bound') !== '1') {
+            forward.setAttribute('data-suite-forward-bound', '1');
+            forward.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                e.preventDefault();
+                if (!canSuiteGoForward()) return;
+                performSuiteForwardNavigation();
+            });
+        }
+
+        syncSuiteHistory();
+
+        if (!global.__simpluriSuiteHistoryBound) {
+            global.__simpluriSuiteHistoryBound = true;
+            window.addEventListener('pageshow', function (e) {
+                syncSuiteHistory({ forceBackForward: !!e.persisted });
+            });
+            window.addEventListener('popstate', function () {
+                syncSuiteHistory({ forceBackForward: true });
+            });
+        }
     }
 
     function isSuiteBackNavigationToken(href) {
         return href === SUITE_BACK_NAV_TOKEN;
+    }
+
+    function isSuiteForwardNavigationToken(href) {
+        return href === SUITE_FORWARD_NAV_TOKEN;
+    }
+
+    function isSuiteHistoryNavigationToken(href) {
+        return isSuiteBackNavigationToken(href) || isSuiteForwardNavigationToken(href);
     }
 
     function createMenuGroupHeader(text) {
@@ -340,6 +536,15 @@
             if (key && u[key]) el.setAttribute('href', u[key]);
         });
         applySuiteNavVisibility();
+        // Re-attach active trip + share tokens. Bare suite URLs overwrite deep links
+        // and cause "Trip not found" on mobile when only ?trip= survives without share.
+        try {
+            if (global.Tripify && typeof global.Tripify.getActiveTripId === 'function'
+                && typeof global.Tripify.updateSuiteNavTripLinks === 'function') {
+                var tripId = global.Tripify.getActiveTripId();
+                if (tripId) global.Tripify.updateSuiteNavTripLinks(tripId);
+            }
+        } catch (e) { /* */ }
     }
 
     function closeAllSuiteMenus() {
@@ -398,15 +603,22 @@
         closeAllSuiteMenus: closeAllSuiteMenus,
         isTripifySuiteHost: isTripifySuiteHost,
         performSuiteBackNavigation: performSuiteBackNavigation,
+        performSuiteForwardNavigation: performSuiteForwardNavigation,
         suiteBackNavigationToken: SUITE_BACK_NAV_TOKEN,
-        isSuiteBackNavigationToken: isSuiteBackNavigationToken
+        suiteForwardNavigationToken: SUITE_FORWARD_NAV_TOKEN,
+        isSuiteBackNavigationToken: isSuiteBackNavigationToken,
+        isSuiteForwardNavigationToken: isSuiteForwardNavigationToken,
+        isSuiteHistoryNavigationToken: isSuiteHistoryNavigationToken,
+        updateSuiteHistoryButtons: updateSuiteHistoryButtons,
+        canSuiteGoBack: canSuiteGoBack,
+        canSuiteGoForward: canSuiteGoForward
     };
 
     function init() {
         closeAllSuiteMenus();
         organizeSuiteMenus();
         applyResolvedLinks();
-        configureTripifySuiteBack();
+        configureTripifySuiteHistory();
         bindSuiteMenus();
     }
 
@@ -415,4 +627,4 @@
     } else {
         init();
     }
-})();
+})(typeof window !== 'undefined' ? window : this);
