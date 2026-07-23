@@ -536,15 +536,6 @@
             if (key && u[key]) el.setAttribute('href', u[key]);
         });
         applySuiteNavVisibility();
-        // Re-attach active trip + share tokens. Bare suite URLs overwrite deep links
-        // and cause "Trip not found" on mobile when only ?trip= survives without share.
-        try {
-            if (global.Tripify && typeof global.Tripify.getActiveTripId === 'function'
-                && typeof global.Tripify.updateSuiteNavTripLinks === 'function') {
-                var tripId = global.Tripify.getActiveTripId();
-                if (tripId) global.Tripify.updateSuiteNavTripLinks(tripId);
-            }
-        } catch (e) { /* */ }
     }
 
     function closeAllSuiteMenus() {
